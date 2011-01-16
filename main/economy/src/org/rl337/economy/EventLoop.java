@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.rl337.economy.data.Event;
 import org.rl337.economy.data.EventLoopProxy;
+import org.rl337.economy.data.Event.EventException;
 
 public class EventLoop implements EventLoopProxy {
     private HashMap<Long, List<Event>> mEventMap;
@@ -25,7 +26,7 @@ public class EventLoop implements EventLoopProxy {
 			return false;
 		}
 		
-		long eventTick = event.getExecutionTick();
+		long eventTick = event.getExecuteOnTick();
 		if (eventTick <= mTick) {
 			return false;
 		}
@@ -50,7 +51,11 @@ public class EventLoop implements EventLoopProxy {
 			
 		int eventsExecuted = 0;
 		for(Event event : eventsToRun) {
-			event.execute(this);
+			try {
+                event.execute(this);
+            } catch (EventException e) {
+                // swallow for now.
+            }
 			eventsExecuted++;
 		}
 		

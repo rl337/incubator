@@ -49,7 +49,7 @@ public class EventLoopTests extends TestCase {
 		}
 
 		@Override
-		public long getExecutionTick() {
+		public long getExecuteOnTick() {
 			return mExecutionTick;
 		}
 		
