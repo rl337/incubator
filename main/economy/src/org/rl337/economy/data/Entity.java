@@ -14,10 +14,16 @@ public class Entity {
     private int mHappiness;
     private int mCredits;
     private Inventory mInventory;
+    private Simulation mSimulation;
+    private long mBornTick;
 
-    public Entity(String name) {
+    public Entity(String name, Simulation s, long tick) {
         mName = name;
         mInventory = new Inventory();
+        mSimulation = s;
+        mHappiness = 300;
+        mCredits = 0;
+        mBornTick = tick;
     }
     
     public String getName() {
@@ -65,13 +71,29 @@ public class Entity {
     }
     
     public Event getEvent(long tick) {
+
+        // once we reach 10000 we remove ourselves
+        if (tick - mBornTick > 10000) {
+            return new AbstractEvent(tick) {
+                public void protectedExecute(EventLoopProxy p) throws Exception {
+                    mSimulation.removeEntity(mName);
+                }
+            };
+        }
+        
         // If we're really happy, we are gonna just do nothing but become just slightly less happy.
         if (mHappiness > 1024) {
             return new AbstractEvent(tick) {
                 @Override
                 public void protectedExecute(EventLoopProxy p) throws Exception { 
                     
-                    smLogger.info(mName + "is happy.");
+                    smLogger.finest(mName + " is happy.");
+                    
+                    if (smRandom.nextInt() % 5 == 0) {
+                        smLogger.finest(mName + " decided to divide");
+                        mHappiness = mHappiness / 4;
+                        mSimulation.addEntity(new Entity(mName + "-" + Long.toString(p.getCurrentTick()), mSimulation, getExecutedOnTick()));
+                    }
                     mHappiness--;
                 }
             };
@@ -85,7 +107,7 @@ public class Entity {
                 if (mInventory.has(Resource.Food, 1)) {
                     InventoryItem food = mInventory.take(Resource.Food, 1);
                     if (food != null) {
-                        smLogger.info(mName + " eats a food");
+                        smLogger.finest(mName + " eats a food");
                         mHappiness += 16; // eating gives us 16 happiness.
                     }
                 } else {
@@ -93,16 +115,16 @@ public class Entity {
                     // it takes 4 perishables to make 1 food.
                     InventoryItem perishable = mInventory.take(Resource.Perishables, 4);
                     if (perishable != null) {
-                        smLogger.info(mName + " converted Perishables into food.");
+                        smLogger.finest(mName + " converted Perishables into food.");
                         mInventory.give(Resource.Food, 1);
                     } else {
                         // We had no food and we don't have enough perishables... we have to forage.
                         // When foraging we have a 1/3 chance of finding Perishables
-                        if (smRandom.nextInt() % 4 == 0) { 
-                            smLogger.info(mName + " foraged and found a perishable");
+                        if (smRandom.nextInt() % 3 == 0) { 
+                            smLogger.finest(mName + " foraged and found a perishable");
                             mInventory.give(Resource.Perishables, 1);
                         } else {
-                            smLogger.info(mName + " foraged but found nothing.");
+                            smLogger.finest(mName + " foraged but found nothing.");
                         }
                     }
                 }
