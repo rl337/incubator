@@ -1,8 +1,14 @@
-package org.rl337.economy.data;
+package org.rl337.economy.data.entity;
 
 import java.util.Random;
 import java.util.logging.Logger;
 
+import org.rl337.economy.data.AbstractEvent;
+import org.rl337.economy.data.Event;
+import org.rl337.economy.data.EventLoopProxy;
+import org.rl337.economy.data.Inventory;
+import org.rl337.economy.data.Resource;
+import org.rl337.economy.data.Simulation;
 import org.rl337.economy.data.Inventory.InventoryItem;
 
 

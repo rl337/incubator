@@ -45,7 +45,7 @@ public class Inventory {
         return mInventory.get(r).getQuantity();
     }
 
-    static class InventoryItem {
+    public static class InventoryItem {
         private int mQuantity;
         private Resource mType;
         

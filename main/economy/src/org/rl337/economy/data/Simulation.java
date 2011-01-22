@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.rl337.economy.data.entity.Entity;
+
 public class Simulation {
     private HashMap<String, Entity> mEntities;
     

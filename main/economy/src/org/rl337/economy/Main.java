@@ -3,9 +3,9 @@ package org.rl337.economy;
 import java.util.List;
 import java.util.logging.Logger;
 
-import org.rl337.economy.data.Entity;
 import org.rl337.economy.data.Event;
 import org.rl337.economy.data.Simulation;
+import org.rl337.economy.data.entity.Entity;
 
 public class Main {
     private static final Logger smLogger = Logger.getLogger(Main.class.getName());
