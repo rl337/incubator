@@ -20,6 +20,7 @@ public class MarketTests extends TestCase {
         mSeller = new TestMarketUser("Seller", null, 0);
     }
     
+    /*
     public void testSimpleOfferAndBuy() {
         mMarket.offer(mSeller, new Bid(mSeller, Resource.Food, 1, 10, 50));
         mMarket.buy(mBuyer, new Bid(mBuyer, Resource.Food, 1, 10, 50));
@@ -34,23 +35,38 @@ public class MarketTests extends TestCase {
         assertEquals("Seller should have no sells.", 0, mBuyer.getSells().size());
         
         TestExecution buy = buyerBuys.get(0);
-        assertEquals("Buyer in buy exeuction should be buyer", mBuyer, buy.buy.getEntity());
-        assertEquals("Seller in buy exeuction should be seller", mSeller, buy.offer.getEntity());
+        assertEquals("Buyer in buy exeuction should be buyer", mBuyer, buy.buy.getMarketUser());
+        assertEquals("Seller in buy exeuction should be seller", mSeller, buy.offer.getMarketUser());
         
         TestExecution sell = sellerSells.get(0);
-        assertEquals("Buyer in buy exeuction should be buyer", mBuyer, sell.buy.getEntity());
-        assertEquals("Seller in buy exeuction should be seller", mSeller, sell.offer.getEntity());
+        assertEquals("Buyer in buy exeuction should be buyer", mBuyer, sell.buy.getMarketUser());
+        assertEquals("Seller in buy exeuction should be seller", mSeller, sell.offer.getMarketUser());
+    }*/
+    
+    public void testOfferAndBuyExpiration() {
+        mMarket.offer(mSeller, new Bid(mSeller, Resource.Food, 1, 10, 50));
+        mMarket.executeTick(5);
+        
+        //assertEquals("Seller should have had 1 expired sell", mSeller.)
+        
+        mMarket.buy(mBuyer, new Bid(mBuyer, Resource.Food, 1, 10, 50));
     }
+    
+    
     
     
     private static class TestMarketUser extends Entity implements MarketUser {
         private ArrayList<TestExecution> mBuys;
         private ArrayList<TestExecution> mSells;
+        private ArrayList<Market.Bid> mBuyExpirations;
+        private ArrayList<Market.Bid> mSellExpirations; 
 
         public TestMarketUser(String name, Simulation s, long tick) {
             super(name, s, tick);
             mBuys = new ArrayList<TestExecution>();
             mSells = new ArrayList<TestExecution>();
+            mBuyExpirations = new ArrayList<Bid>();
+            mSellExpirations = new ArrayList<Bid>();
         }
 
         @Override
@@ -74,6 +90,16 @@ public class MarketTests extends TestCase {
         
         public ArrayList<TestExecution> getSells() {
             return mSells;
+        }
+
+        @Override
+        public void onBuyExpired(Bid buy) {
+            mBuyExpirations.add(buy);
+        }
+
+        @Override
+        public void onOfferExpired(Bid offer) {
+            mSellExpirations.add(offer);
         }
         
     }
