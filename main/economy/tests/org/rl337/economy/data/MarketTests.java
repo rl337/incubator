@@ -1,6 +1,7 @@
 package org.rl337.economy.data;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import junit.framework.TestCase;
 
@@ -19,12 +20,14 @@ public class MarketTests extends TestCase {
         mSeller = new TestMarketUser("Seller", null, 0);
     }
     
-    /*
     public void testSimpleOfferAndBuy() {
-        mMarket.offer(mSeller, new Bid(mSeller, Resource.Food, 1, 10, 50));
-        mMarket.buy(mBuyer, new Bid(mBuyer, Resource.Food, 1, 10, 50));
+        mMarket.offer(mSeller, Resource.Food, 10, 250, 50);
+        mMarket.buy(mBuyer, Resource.Food, 10, 250, 50);
         
         // This should have triggered a buy.
+        mMarket.executeTick(1);
+        assertEquals("market should have no more active buys", 0, mMarket.getActiveBuys().length);
+        assertEquals("market should have no more active sells", 0, mMarket.getActiveOffers().length);
         
         List<TestExecution> sellerSells = mSeller.getSells();
         List<TestExecution> buyerBuys = mBuyer.getBuys();
@@ -35,12 +38,74 @@ public class MarketTests extends TestCase {
         
         TestExecution buy = buyerBuys.get(0);
         assertEquals("Buyer in buy exeuction should be buyer", mBuyer, buy.buy.getMarketUser());
+        assertEquals("Buy should have executed for a qty of 10", 10, buy.qty);
+        assertEquals("Buy's bid should have nothing in QtyLeft", 0, buy.buy.getQuantityLeft());
         assertEquals("Seller in buy exeuction should be seller", mSeller, buy.offer.getMarketUser());
-        
+
         TestExecution sell = sellerSells.get(0);
         assertEquals("Buyer in buy exeuction should be buyer", mBuyer, sell.buy.getMarketUser());
         assertEquals("Seller in buy exeuction should be seller", mSeller, sell.offer.getMarketUser());
-    }*/
+        assertEquals("Sell should have executed for a qty of 10", 10, sell.qty);
+        assertEquals("Seller's bid should have nothing in QtyLeft", 0, sell.offer.getQuantityLeft());
+    }
+
+    public void testPartialOffer() {
+        mMarket.offer(mSeller, Resource.Food, 50, 250, 50);
+        mMarket.buy(mBuyer, Resource.Food, 10, 250, 50);
+        
+        // This should have triggered a buy.
+        mMarket.executeTick(1);
+        assertEquals("market should have no more active buys", 0, mMarket.getActiveBuys().length);
+        assertEquals("market should still have one active sell", 1, mMarket.getActiveOffers().length);
+        
+        List<TestExecution> sellerSells = mSeller.getSells();
+        List<TestExecution> buyerBuys = mBuyer.getBuys();
+        assertEquals("Seller should have no buys.", 0, mSeller.getBuys().size());
+        assertEquals("Seller should have one sell.", 1, sellerSells.size());
+        assertEquals("Buyer should have one buy.", 1, buyerBuys.size());
+        assertEquals("Seller should have no sells.", 0, mBuyer.getSells().size());
+        
+        TestExecution buy = buyerBuys.get(0);
+        assertEquals("Buyer in buy exeuction should be buyer", mBuyer, buy.buy.getMarketUser());
+        assertEquals("Buy should have executed for a qty of 10", 10, buy.qty);
+        assertEquals("Buy's bid should have nothing in QtyLeft", 0, buy.buy.getQuantityLeft());
+        assertEquals("Seller in buy exeuction should be seller", mSeller, buy.offer.getMarketUser());
+
+        TestExecution sell = sellerSells.get(0);
+        assertEquals("Buyer in buy exeuction should be buyer", mBuyer, sell.buy.getMarketUser());
+        assertEquals("Seller in buy exeuction should be seller", mSeller, sell.offer.getMarketUser());
+        assertEquals("Sell should have executed for a qty of 10", 10, sell.qty);
+        assertEquals("Seller's bid should have 40 QtyLeft", 40, sell.offer.getQuantityLeft());
+    }
+
+    public void testPartialBuy() {
+        mMarket.offer(mSeller, Resource.Food, 10, 250, 50);
+        mMarket.buy(mBuyer, Resource.Food, 50, 250, 50);
+        
+        // This should have triggered a buy.
+        mMarket.executeTick(1);
+        assertEquals("market should still have one active buys", 1, mMarket.getActiveBuys().length);
+        assertEquals("market should have no active sells", 0, mMarket.getActiveOffers().length);
+        
+        List<TestExecution> sellerSells = mSeller.getSells();
+        List<TestExecution> buyerBuys = mBuyer.getBuys();
+        assertEquals("Seller should have no buys.", 0, mSeller.getBuys().size());
+        assertEquals("Seller should have one sell.", 1, sellerSells.size());
+        assertEquals("Buyer should have one buy.", 1, buyerBuys.size());
+        assertEquals("Seller should have no sells.", 0, mBuyer.getSells().size());
+        
+        TestExecution buy = buyerBuys.get(0);
+        assertEquals("Buyer in buy exeuction should be buyer", mBuyer, buy.buy.getMarketUser());
+        assertEquals("Buy should have executed for a qty of 10", 10, buy.qty);
+        assertEquals("Buy's bid should have 40 left in QtyLeft", 40, buy.buy.getQuantityLeft());
+        assertEquals("Seller in buy exeuction should be seller", mSeller, buy.offer.getMarketUser());
+
+        TestExecution sell = sellerSells.get(0);
+        assertEquals("Buyer in buy exeuction should be buyer", mBuyer, sell.buy.getMarketUser());
+        assertEquals("Seller in buy exeuction should be seller", mSeller, sell.offer.getMarketUser());
+        assertEquals("Sell should have executed for a qty of 10", 10, sell.qty);
+        assertEquals("Seller's bid should have 0 QtyLeft", 0, sell.offer.getQuantityLeft());
+    }
     
     public void testMultipleIdenticalOffers() {
         mMarket.offer(mSeller, Resource.Food, 1, 10, 3);
@@ -91,13 +156,13 @@ public class MarketTests extends TestCase {
         }
 
         @Override
-        public void onBuyExecuted(Bid offer, Bid request, boolean partial) {
-            mBuys.add(new TestExecution(request, offer, partial));
+        public void onBuyExecuted(Bid offer, Bid request, int qty) {
+            mBuys.add(new TestExecution(request, offer, qty));
         }
 
         @Override
-        public void onOfferExecuted(Bid offer, Bid request, boolean partial) {
-            mSells.add(new TestExecution(request, offer, partial));
+        public void onOfferExecuted(Bid offer, Bid request, int qty) {
+            mSells.add(new TestExecution(request, offer, qty));
         }
         
         public ArrayList<TestExecution> getBuys() {
@@ -132,12 +197,12 @@ public class MarketTests extends TestCase {
     public static class TestExecution {
         public Bid buy;
         public Bid offer;
-        public boolean partial;
+        public int qty;
         
-        public TestExecution(Bid b, Bid o, boolean p) {
+        public TestExecution(Bid b, Bid o, int p) {
             buy = b;
             offer = o;
-            partial = p;
+            qty = p;
         }
     }
 }

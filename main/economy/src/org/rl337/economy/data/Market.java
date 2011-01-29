@@ -52,18 +52,95 @@ public class Market {
             mOffers.remove(offer);
         }
         
+        satisfyBuys();
+        satisfyOffers();
     }
     
     private Bid newBid(MarketUser user, Resource resource, int qty, int cost, long exp) {
         return new Bid(nextId(), user, resource, qty, cost, exp);
     }
+
     
-    private Bid[] satisfyBid(Bid bid, TreeSet<Bid> pool) {
+    private void satisfyOffers() {
+        Bid[] sells = mOffers.toArray(new Bid[mOffers.size()]);
         
-        //for()
-        
-        
-        return null;
+        for(Bid sell : sells) {
+            while (!mBuys.isEmpty() && sell.getQuantityLeft() > 0) {
+                // get the lowest offer
+                Bid buy = mBuys.last();
+                int buyCost = buy.getCost();
+                
+                // if the highest buy is less than our sales price, exit
+                if (buyCost < sell.getCost()) {
+                    break;
+                }
+                
+                
+                int buyQty = buy.getQuantityLeft();
+                int inventory = sell.getQuantityLeft();
+                // If the buy needs more than what we have, execute partial on the buy
+                // then break
+                if (inventory < buyQty) {
+                    buy.take(inventory);
+                    sell.take(inventory);
+                    sell.getMarketUser().onOfferExecuted(sell, buy, inventory);
+                    buy.getMarketUser().onBuyExecuted(sell, buy, inventory);
+                    break;
+                } 
+    
+                // If we get here, we have more or exactly the same as the buy
+                sell.take(buyQty);
+                buy.take(buyQty);
+                sell.getMarketUser().onOfferExecuted(sell, buy, buyQty);
+                buy.getMarketUser().onBuyExecuted(sell, buy, buyQty);
+                mBuys.remove(buy);
+            }
+            
+            if (sell.getQuantityLeft() < 1) {
+                mOffers.remove(sell);
+            }
+        }
+    }
+
+    
+    private void satisfyBuys() {
+        Bid[] buys = mBuys.toArray(new Bid[mBuys.size()]);
+        for(Bid buy : buys) {
+            while (!mOffers.isEmpty() && buy.getQuantityLeft() > 0) {
+                // get the lowest offer
+                Bid offer = mOffers.first();
+                int offerCost = offer.getCost();
+                
+                // if the lowest offer is more than the bid, we stop.
+                if (offerCost > buy.getCost()) {
+                    break;
+                }
+                
+                int offerQty = offer.getQuantityLeft();
+                int needed = buy.getQuantityLeft();
+                // If the offer has more than we need, we need
+                // to execute it as a partial offer execution
+                if (needed < offerQty) {
+                    offer.take(needed);
+                    buy.take(needed);
+                    offer.getMarketUser().onOfferExecuted(offer, buy, needed);
+                    buy.getMarketUser().onBuyExecuted(offer, buy, needed);
+                    break;
+                } 
+    
+                // if we get here, the offer exactly satisfies or we need
+                // more than the offer has.
+                offer.take(offerQty);
+                buy.take(offerQty);
+                offer.getMarketUser().onOfferExecuted(offer, buy, offerQty);
+                buy.getMarketUser().onBuyExecuted(offer, buy, offerQty);
+                mOffers.remove(offer);
+            }
+            
+            if (buy.getQuantityLeft() < 1) {
+                mBuys.remove(buy);
+            }
+        }
     }
     
     public Bid[] getActiveBuys() {
@@ -79,6 +156,7 @@ public class Market {
         private MarketUser mMarketUser;
         private Resource mResource;
         private int mQuantity;
+        private int mQtyLeft;
         private int mCost;
         private long mExpiration;
         
@@ -89,6 +167,7 @@ public class Market {
             mQuantity = q;
             mCost = c;
             mExpiration = expiresOn;
+            mQtyLeft = q;
         }
         
         public long getId() {
@@ -111,12 +190,16 @@ public class Market {
             return mQuantity;
         }
         
+        public int getQuantityLeft() {
+            return mQtyLeft;
+        }
+        
         public boolean take(int qty) {
-            if (qty < mQuantity) {
+            if (qty > mQtyLeft) {
                 return false;
             }
             
-            mQuantity -= qty;
+            mQtyLeft -= qty;
             return true;
         }
         
