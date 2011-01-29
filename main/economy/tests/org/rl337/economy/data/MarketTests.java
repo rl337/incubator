@@ -1,13 +1,12 @@
 package org.rl337.economy.data;
 
 import java.util.ArrayList;
-import java.util.List;
+
+import junit.framework.TestCase;
 
 import org.rl337.economy.data.Market.Bid;
 import org.rl337.economy.data.entity.Entity;
 import org.rl337.economy.data.entity.MarketUser;
-
-import junit.framework.TestCase;
 
 public class MarketTests extends TestCase {
     private Market mMarket;
@@ -43,17 +42,34 @@ public class MarketTests extends TestCase {
         assertEquals("Seller in buy exeuction should be seller", mSeller, sell.offer.getMarketUser());
     }*/
     
-    public void testOfferAndBuyExpiration() {
-        mMarket.offer(mSeller, new Bid(mSeller, Resource.Food, 1, 10, 50));
-        mMarket.executeTick(5);
+    public void testMultipleIdenticalOffers() {
+        mMarket.offer(mSeller, Resource.Food, 1, 10, 3);
+        mMarket.offer(mSeller, Resource.Food, 1, 10, 3);
         
-        //assertEquals("Seller should have had 1 expired sell", mSeller.)
+        assertEquals("Seller should have 2 identical offers", 2, mMarket.getActiveOffers().length);
         
-        mMarket.buy(mBuyer, new Bid(mBuyer, Resource.Food, 1, 10, 50));
+        mMarket.buy(mBuyer, Resource.Food, 1, 10, 10);
+        mMarket.buy(mBuyer, Resource.Food, 1, 10, 10);
+        assertEquals("Buyer should have 2 identical buys", 2, mMarket.getActiveBuys().length);
     }
     
-    
-    
+    public void testOfferAndBuyExpiration() {
+        mMarket.offer(mSeller, Resource.Food, 1, 10, 3);
+        mMarket.offer(mSeller, Resource.Food, 1, 10, 50);
+        mMarket.executeTick(5);
+        
+        assertEquals("Seller should have had 1 expired sell", 1, mSeller.getgetExpiredSells().size());
+        assertEquals("Seller should have had no expired buys", 0, mSeller.getExpiredBuys().size());
+        assertEquals("Seller should have had no buys", 0, mSeller.getBuys().size());
+        assertEquals("Seller should have had no sells", 0, mSeller.getSells().size());
+        
+        mMarket.buy(mBuyer, Resource.Food, 1, 10, 10);
+        mMarket.executeTick(11);
+        assertEquals("Buyer should have had no expired sells", 0, mBuyer.getgetExpiredSells().size());
+        assertEquals("Buyer should have had one expired buy", 1, mBuyer.getExpiredBuys().size());
+        assertEquals("Buyer should have had no buys", 0, mBuyer.getBuys().size());
+        assertEquals("Buyer should have had no sells", 0, mBuyer.getSells().size());
+    }
     
     private static class TestMarketUser extends Entity implements MarketUser {
         private ArrayList<TestExecution> mBuys;
@@ -90,6 +106,15 @@ public class MarketTests extends TestCase {
         
         public ArrayList<TestExecution> getSells() {
             return mSells;
+        }
+        
+        
+        public ArrayList<Bid> getExpiredBuys() {
+            return mBuyExpirations;
+        }
+        
+        public ArrayList<Bid> getgetExpiredSells() {
+            return mSellExpirations;
         }
 
         @Override

@@ -12,6 +12,12 @@ public class Market {
     private TreeSet<Bid> mOffers;
     private TreeSet<Bid> mBuys;
     
+    private long mCurrentId;
+    
+    private long nextId() {
+        return mCurrentId++;
+    }
+    
     public Market() {
         mOfferExpirations = new TreeSet<Bid>(new CompareByCost());
         mBuyExpirations = new TreeSet<Bid>(new CompareByCost());
@@ -20,29 +26,44 @@ public class Market {
         mBuys = new TreeSet<Bid>(new CompareByExpirationTick());
     }
     
-    public void offer(MarketUser offerer, Bid offer) {
+    public void offer(MarketUser user, Resource resource, int qty, int cost, long exp) {
+        Bid offer = newBid(user, resource, qty, cost, exp);
         mOfferExpirations.add(offer);
         mOffers.add(offer);
     }
     
-    public void buy(MarketUser buyer, Bid buy) {
+    public void buy(MarketUser user, Resource resource, int qty, int cost, long exp) {
+        Bid buy = newBid(user, resource, qty, cost, exp);
         mBuys.add(buy);
         mBuyExpirations.add(buy);
     }
     
     public void executeTick(long tick) {
         // First expire any offers or buys that are set to expire before this tick.
-        while(mBuyExpirations.first().getExpiration() < tick) {
+        while(!mBuyExpirations.isEmpty() && mBuyExpirations.first().getExpiration() < tick) {
             Bid buy = mBuyExpirations.pollFirst();
             buy.getMarketUser().onBuyExpired(buy);
             mBuys.remove(buy);
         }
-        
-        while(mOfferExpirations.first().getExpiration() < tick) {
+
+        while(!mOfferExpirations.isEmpty() && mOfferExpirations.first().getExpiration() < tick) {
             Bid offer = mOfferExpirations.pollFirst();
             offer.getMarketUser().onOfferExpired(offer);
             mOffers.remove(offer);
         }
+        
+    }
+    
+    private Bid newBid(MarketUser user, Resource resource, int qty, int cost, long exp) {
+        return new Bid(nextId(), user, resource, qty, cost, exp);
+    }
+    
+    private Bid[] satisfyBid(Bid bid, TreeSet<Bid> pool) {
+        
+        //for()
+        
+        
+        return null;
     }
     
     public Bid[] getActiveBuys() {
@@ -54,18 +75,24 @@ public class Market {
     }
 
     public static class Bid {
+        private long mId;
         private MarketUser mMarketUser;
         private Resource mResource;
         private int mQuantity;
         private int mCost;
         private long mExpiration;
         
-        public Bid(MarketUser e, Resource r, int q, int c, long expiresOn) {
+        private Bid(long id, MarketUser e, Resource r, int q, int c, long expiresOn) {
+            mId = id;
             mMarketUser = e;
             mResource = r;
             mQuantity = q;
             mCost = c;
             mExpiration = expiresOn;
+        }
+        
+        public long getId() {
+            return mId;
         }
         
         public MarketUser getMarketUser() {
@@ -105,7 +132,20 @@ public class Market {
             long exp0 = arg0.getExpiration();
             long exp1 = arg1.getExpiration();
             
-            if (exp0 == exp1) { return 0; }
+            if (exp0 == exp1) {
+                long id0 = arg0.getId();
+                long id1 = arg1.getId();
+                if (id0 == id1) {
+                    return 0;
+                }
+                
+                if (id0 < id1) {
+                    return -1;
+                }
+                
+                return 1;
+            }
+            
             if (exp0 < exp1) { return -1; }
             return 1;
         }
@@ -114,7 +154,20 @@ public class Market {
     private static class CompareByCost implements Comparator<Bid> {
         @Override
         public int compare(Bid arg0, Bid arg1) {
-            return arg0.getCost() - arg1.getCost();
+            int result = arg0.getCost() - arg1.getCost();
+            if (result != 0) return result;
+            
+            long id0 = arg0.getId();
+            long id1 = arg1.getId();
+            if (id0 == id1) {
+                return 0;
+            }
+            
+            if (id0 < id1) {
+                return -1;
+            }
+            
+            return 1;
         }
     }
 
