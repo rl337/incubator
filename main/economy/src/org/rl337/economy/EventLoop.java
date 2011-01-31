@@ -4,67 +4,68 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.rl337.economy.data.Event;
-import org.rl337.economy.data.EventLoopProxy;
-import org.rl337.economy.data.Event.EventException;
+import org.rl337.economy.KeyFactory.Key;
+import org.rl337.economy.event.Event;
+import org.rl337.economy.event.Event.EventException;
 
-public class EventLoop implements EventLoopProxy {
-    private HashMap<Long, List<Event>> mEventMap;
-    private long mTick;
+public class EventLoop {
+    private HashMap<Key, List<Event>> mEventMap;
+    private Key mCurrentTick;
+    private SimulationProxy mSimulationProxy;
 
-    public EventLoop() {
-        mEventMap = new HashMap<Long, List<Event>>();
-        mTick = 0;
-    }
-
-    public void setTick(long tick) {
-        mTick = tick;
+    public EventLoop(SimulationProxy simulationProxy) {
+        mEventMap = new HashMap<Key, List<Event>>();
+        mCurrentTick = simulationProxy.getCurrentTick();
+        mSimulationProxy = simulationProxy;
     }
 
     public boolean addEvent(Event event) {
         if (event == null) {
             return false;
         }
-
-        long eventTick = event.getExecuteOnTick();
-        if (eventTick <= mTick) {
+        
+        Key executeOnTick = event.getExecuteOnTick();
+        if (mCurrentTick.getValue() >= executeOnTick.getValue()) {
             return false;
         }
 
-        if (!mEventMap.containsKey(eventTick)) {
-            mEventMap.put(eventTick, new ArrayList<Event>());
+        if (!mEventMap.containsKey(executeOnTick)) {
+            mEventMap.put(executeOnTick, new ArrayList<Event>());
         }
 
-        List<Event> eventList = mEventMap.get(eventTick);
+        List<Event> eventList = mEventMap.get(executeOnTick);
         eventList.add(event);
 
         return true;
     }
 
-    public int executeNextTick() {
-        if (!mEventMap.containsKey(mTick)) {
-            mTick++;
+    public int executeTick(Key tick) {
+        if (tick == null || tick.getValue() < mCurrentTick.getValue()) {
+            return 0;
+        }
+        
+        mCurrentTick = tick;
+        if (!mEventMap.containsKey(tick)) {
             return 0;
         }
 
-        List<Event> eventsToRun = mEventMap.remove(mTick);
+        List<Event> eventsToRun = mEventMap.remove(tick);
 
         int eventsExecuted = 0;
         for (Event event : eventsToRun) {
             try {
-                event.execute(this);
+                event.execute(mSimulationProxy);
             } catch (EventException e) {
                 // swallow for now.
             }
             eventsExecuted++;
         }
 
-        mTick++;
         return eventsExecuted;
     }
 
-    public long getCurrentTick() {
-        return mTick;
+    public Key getCurrentTick() {
+        return mCurrentTick;
     }
 
     public boolean isIdle() {

@@ -1,22 +1,25 @@
-package org.rl337.economy.data;
+package org.rl337.economy.event;
+
+import org.rl337.economy.SimulationProxy;
+import org.rl337.economy.KeyFactory.Key;
 
 public abstract class AbstractEvent implements Event {
-    private long mExecuteOnTick;
-    private long mExecutedTick;
+    private Key mExecuteOnTick;
+    private Key mExecutedTick;
     private boolean mSuccess;
     
-    public AbstractEvent(long tickToExecute) {
+    public AbstractEvent(Key tickToExecute) {
         mExecuteOnTick = tickToExecute;
-        mExecutedTick = -1;
+        mExecutedTick = null;
         mSuccess = false;
     }
 
     @Override
-    public long getExecuteOnTick() {
+    public Key getExecuteOnTick() {
         return mExecuteOnTick;
     }
     
-    public long getExecutedOnTick() {
+    public Key getExecutedOnTick() {
         return mExecutedTick;
     }
     
@@ -25,10 +28,10 @@ public abstract class AbstractEvent implements Event {
     }
     
     public boolean executed() {
-        return mExecutedTick != -1;
+        return mExecutedTick != null;
     }
     
-    public void execute(EventLoopProxy p) throws EventException {
+    public void execute(SimulationProxy p) throws EventException {
         mExecutedTick = p.getCurrentTick();
         
         try {
@@ -42,6 +45,6 @@ public abstract class AbstractEvent implements Event {
         mSuccess = true;
     }
     
-    public abstract void protectedExecute(EventLoopProxy p)throws Exception;
+    public abstract void protectedExecute(SimulationProxy p)throws Exception;
     
 }

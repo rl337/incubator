@@ -5,6 +5,9 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.rl337.economy.KeyFactory;
+import org.rl337.economy.KeyFactory.Key;
+import org.rl337.economy.KeyFactory.KeyType;
 import org.rl337.economy.data.Market.Bid;
 import org.rl337.economy.data.entity.Entity;
 import org.rl337.economy.data.entity.MarketUser;
@@ -13,11 +16,13 @@ public class MarketTests extends TestCase {
     private Market mMarket;
     private TestMarketUser mSeller;
     private TestMarketUser mBuyer;
+    private KeyFactory mFactory;
     
     public void setUp() {
-        mMarket = new Market();
-        mBuyer = new TestMarketUser("Buyer", null, 0);
-        mSeller = new TestMarketUser("Seller", null, 0);
+        mFactory = new KeyFactory();
+        mMarket = new Market(mFactory);
+        mBuyer = new TestMarketUser("Buyer", mFactory.currentKey(KeyType.Tick));
+        mSeller = new TestMarketUser("Seller", mFactory.currentKey(KeyType.Tick));
     }
     
     public void testSimpleOfferAndBuy() {
@@ -25,7 +30,7 @@ public class MarketTests extends TestCase {
         mMarket.buy(mBuyer, Resource.Food, 10, 250, 50);
         
         // This should have triggered a buy.
-        mMarket.executeTick(1);
+        mMarket.executeTick(mFactory.newKey(KeyType.Tick));
         assertEquals("market should have no more active buys", 0, mMarket.getActiveBuys().length);
         assertEquals("market should have no more active sells", 0, mMarket.getActiveOffers().length);
         
@@ -54,7 +59,7 @@ public class MarketTests extends TestCase {
         mMarket.buy(mBuyer, Resource.Food, 10, 250, 50);
         
         // This should have triggered a buy.
-        mMarket.executeTick(1);
+        mMarket.executeTick(mFactory.newKey(KeyType.Tick));
         assertEquals("market should have no more active buys", 0, mMarket.getActiveBuys().length);
         assertEquals("market should still have one active sell", 1, mMarket.getActiveOffers().length);
         
@@ -83,7 +88,7 @@ public class MarketTests extends TestCase {
         mMarket.buy(mBuyer, Resource.Food, 50, 250, 50);
         
         // This should have triggered a buy.
-        mMarket.executeTick(1);
+        mMarket.executeTick(mFactory.newKey(KeyType.Tick));
         assertEquals("market should still have one active buys", 1, mMarket.getActiveBuys().length);
         assertEquals("market should have no active sells", 0, mMarket.getActiveOffers().length);
         
@@ -121,15 +126,27 @@ public class MarketTests extends TestCase {
     public void testOfferAndBuyExpiration() {
         mMarket.offer(mSeller, Resource.Food, 1, 10, 3);
         mMarket.offer(mSeller, Resource.Food, 1, 10, 50);
-        mMarket.executeTick(5);
+
+        mMarket.executeTick(mFactory.newKey(KeyType.Tick));
+        mMarket.executeTick(mFactory.newKey(KeyType.Tick));
+        mMarket.executeTick(mFactory.newKey(KeyType.Tick));
+        mMarket.executeTick(mFactory.newKey(KeyType.Tick));
         
         assertEquals("Seller should have had 1 expired sell", 1, mSeller.getgetExpiredSells().size());
         assertEquals("Seller should have had no expired buys", 0, mSeller.getExpiredBuys().size());
         assertEquals("Seller should have had no buys", 0, mSeller.getBuys().size());
         assertEquals("Seller should have had no sells", 0, mSeller.getSells().size());
         
-        mMarket.buy(mBuyer, Resource.Food, 1, 10, 10);
-        mMarket.executeTick(11);
+        mMarket.buy(mBuyer, Resource.Food, 1, 5, 10);
+
+        mMarket.executeTick(mFactory.newKey(KeyType.Tick));
+        mMarket.executeTick(mFactory.newKey(KeyType.Tick));
+        mMarket.executeTick(mFactory.newKey(KeyType.Tick));
+        mMarket.executeTick(mFactory.newKey(KeyType.Tick));
+        mMarket.executeTick(mFactory.newKey(KeyType.Tick));
+        mMarket.executeTick(mFactory.newKey(KeyType.Tick));
+        mMarket.executeTick(mFactory.newKey(KeyType.Tick));
+
         assertEquals("Buyer should have had no expired sells", 0, mBuyer.getgetExpiredSells().size());
         assertEquals("Buyer should have had one expired buy", 1, mBuyer.getExpiredBuys().size());
         assertEquals("Buyer should have had no buys", 0, mBuyer.getBuys().size());
@@ -142,8 +159,8 @@ public class MarketTests extends TestCase {
         private ArrayList<Market.Bid> mBuyExpirations;
         private ArrayList<Market.Bid> mSellExpirations; 
 
-        public TestMarketUser(String name, Simulation s, long tick) {
-            super(name, s, tick);
+        public TestMarketUser(String name, Key tick) {
+            super(name, tick);
             mBuys = new ArrayList<TestExecution>();
             mSells = new ArrayList<TestExecution>();
             mBuyExpirations = new ArrayList<Bid>();

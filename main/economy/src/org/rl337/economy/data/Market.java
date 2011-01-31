@@ -3,6 +3,9 @@ package org.rl337.economy.data;
 import java.util.Comparator;
 import java.util.TreeSet;
 
+import org.rl337.economy.KeyFactory;
+import org.rl337.economy.KeyFactory.Key;
+import org.rl337.economy.KeyFactory.KeyType;
 import org.rl337.economy.data.entity.MarketUser;
 
 public class Market {
@@ -12,15 +15,12 @@ public class Market {
     private TreeSet<Bid> mOffers;
     private TreeSet<Bid> mBuys;
     
-    private long mCurrentId;
+    private KeyFactory mKeyFactory;
     
-    private long nextId() {
-        return mCurrentId++;
-    }
-    
-    public Market() {
+    public Market(KeyFactory keyFactory) {
         mOfferExpirations = new TreeSet<Bid>(new CompareByCost());
         mBuyExpirations = new TreeSet<Bid>(new CompareByCost());
+        mKeyFactory = keyFactory;
         
         mOffers = new TreeSet<Bid>(new CompareByExpirationTick());
         mBuys = new TreeSet<Bid>(new CompareByExpirationTick());
@@ -38,15 +38,16 @@ public class Market {
         mBuyExpirations.add(buy);
     }
     
-    public void executeTick(long tick) {
+    public void executeTick(Key tick) {
+        long tickValue = tick.getValue();
         // First expire any offers or buys that are set to expire before this tick.
-        while(!mBuyExpirations.isEmpty() && mBuyExpirations.first().getExpiration() < tick) {
+        while(!mBuyExpirations.isEmpty() && mBuyExpirations.first().getExpiration() < tickValue) {
             Bid buy = mBuyExpirations.pollFirst();
             buy.getMarketUser().onBuyExpired(buy);
             mBuys.remove(buy);
         }
 
-        while(!mOfferExpirations.isEmpty() && mOfferExpirations.first().getExpiration() < tick) {
+        while(!mOfferExpirations.isEmpty() && mOfferExpirations.first().getExpiration() < tickValue) {
             Bid offer = mOfferExpirations.pollFirst();
             offer.getMarketUser().onOfferExpired(offer);
             mOffers.remove(offer);
@@ -57,7 +58,8 @@ public class Market {
     }
     
     private Bid newBid(MarketUser user, Resource resource, int qty, int cost, long exp) {
-        return new Bid(nextId(), user, resource, qty, cost, exp);
+        Key key = mKeyFactory.newKey(KeyType.Bid);
+        return new Bid(key, user, resource, qty, cost, exp);
     }
 
     
@@ -152,7 +154,7 @@ public class Market {
     }
 
     public static class Bid {
-        private long mId;
+        private Key mId;
         private MarketUser mMarketUser;
         private Resource mResource;
         private int mQuantity;
@@ -160,8 +162,8 @@ public class Market {
         private int mCost;
         private long mExpiration;
         
-        private Bid(long id, MarketUser e, Resource r, int q, int c, long expiresOn) {
-            mId = id;
+        private Bid(Key key, MarketUser e, Resource r, int q, int c, long expiresOn) {
+            mId = key;
             mMarketUser = e;
             mResource = r;
             mQuantity = q;
@@ -170,7 +172,7 @@ public class Market {
             mQtyLeft = q;
         }
         
-        public long getId() {
+        public Key getKey() {
             return mId;
         }
         
@@ -216,8 +218,8 @@ public class Market {
             long exp1 = arg1.getExpiration();
             
             if (exp0 == exp1) {
-                long id0 = arg0.getId();
-                long id1 = arg1.getId();
+                long id0 = arg0.getKey().getValue();
+                long id1 = arg1.getKey().getValue();
                 if (id0 == id1) {
                     return 0;
                 }
@@ -240,8 +242,8 @@ public class Market {
             int result = arg0.getCost() - arg1.getCost();
             if (result != 0) return result;
             
-            long id0 = arg0.getId();
-            long id1 = arg1.getId();
+            long id0 = arg0.getKey().getValue();
+            long id1 = arg1.getKey().getValue();
             if (id0 == id1) {
                 return 0;
             }

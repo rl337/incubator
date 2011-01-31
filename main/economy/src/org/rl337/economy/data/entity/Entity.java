@@ -3,13 +3,13 @@ package org.rl337.economy.data.entity;
 import java.util.Random;
 import java.util.logging.Logger;
 
-import org.rl337.economy.data.AbstractEvent;
-import org.rl337.economy.data.Event;
-import org.rl337.economy.data.EventLoopProxy;
+import org.rl337.economy.SimulationProxy;
+import org.rl337.economy.KeyFactory.Key;
 import org.rl337.economy.data.Inventory;
 import org.rl337.economy.data.Resource;
-import org.rl337.economy.data.Simulation;
 import org.rl337.economy.data.Inventory.InventoryItem;
+import org.rl337.economy.event.AbstractEvent;
+import org.rl337.economy.event.Event;
 
 
 public class Entity {
@@ -20,16 +20,16 @@ public class Entity {
     private int mHappiness;
     private int mCredits;
     private Inventory mInventory;
-    private Simulation mSimulation;
-    private long mBornTick;
+    private Key mBornTick;
+    private boolean mAlive;
 
-    public Entity(String name, Simulation s, long tick) {
+    public Entity(String name, Key tick) {
         mName = name;
         mInventory = new Inventory();
-        mSimulation = s;
         mHappiness = 300;
         mCredits = 0;
         mBornTick = tick;
+        mAlive = true;
     }
     
     public String getName() {
@@ -76,29 +76,33 @@ public class Entity {
         mHappiness -= qty;
     }
     
-    public Event getEvent(long tick) {
+    public boolean isAlive() {
+        return mAlive;
+    }
+    
+    public void die() {
+        mAlive = false;
+    }
+    
+    public Event getEvent(Key tick) {
 
         // once we reach 10000 we remove ourselves
-        if (tick - mBornTick > 10000) {
-            return new AbstractEvent(tick) {
-                public void protectedExecute(EventLoopProxy p) throws Exception {
-                    mSimulation.removeEntity(mName);
-                }
-            };
+        if (mAlive && tick.getValue() - mBornTick.getValue() > 10000) {
+            die();
         }
         
         // If we're really happy, we are gonna just do nothing but become just slightly less happy.
         if (mHappiness > 1024) {
             return new AbstractEvent(tick) {
                 @Override
-                public void protectedExecute(EventLoopProxy p) throws Exception { 
+                public void protectedExecute(SimulationProxy p) throws Exception { 
                     
                     smLogger.finest(mName + " is happy.");
                     
                     if (smRandom.nextInt() % 5 == 0) {
                         smLogger.finest(mName + " decided to divide");
                         mHappiness = mHappiness / 4;
-                        mSimulation.addEntity(new Entity(mName + "-" + Long.toString(p.getCurrentTick()), mSimulation, getExecutedOnTick()));
+                        p.addEntity(mName + "-" + Long.toString(p.getCurrentTick().getValue()));
                     }
                     mHappiness--;
                 }
@@ -109,7 +113,7 @@ public class Entity {
         // in inventory, we want to convert Perishables to Food... and if we have no perishables
         // we want to forage.. which gives us perishables.
         return new AbstractEvent(tick) {
-            public void protectedExecute(EventLoopProxy p) throws Exception {
+            public void protectedExecute(SimulationProxy p) throws Exception {
                 if (mInventory.has(Resource.Food, 1)) {
                     InventoryItem food = mInventory.take(Resource.Food, 1);
                     if (food != null) {
