@@ -1,12 +1,13 @@
 package org.rl337.economy;
 
 import java.util.List;
-import java.util.logging.Logger;
 
 import org.rl337.economy.data.entity.Entity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Main {
-    private static final Logger smLogger = Logger.getLogger(Main.class.getName());
+    private static final Logger smLogger = LoggerFactory.getLogger(Main.class);
     
     public static void main(String[] args) {
         smLogger.info("Starting simulation");
