@@ -7,5 +7,10 @@
 	<classpathentry kind="lib" path="C:/Users/Richard Lee/Documents/Github/incubator/main/economy/thirdparty/logback-0.9.28/logback-classic-0.9.28.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Richard Lee/Documents/Github/incubator/main/economy/thirdparty/logback-0.9.28/logback-core-0.9.28.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Richard Lee/Documents/Github/incubator/main/economy/thirdparty/slf4j-1.6.1/slf4j-api-1.6.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Richard Lee/Documents/Github/incubator/main/economy/thirdparty/google-gson-1.6-release/gson-1.6.jar" sourcepath="C:/Users/Richard Lee/Documents/Github/incubator/main/economy/thirdparty/google-gson-1.6-release/gson-1.6-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:/Users/Richard Lee/Documents/Github/incubator/main/economy/thirdparty/google-gson-1.6-release/gson-1.6-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="build"/>
 </classpath>
