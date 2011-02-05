@@ -1,25 +1,25 @@
 package org.rl337.economy.event;
 
 import org.rl337.economy.SimulationProxy;
-import org.rl337.economy.KeyFactory.Key;
+import org.rl337.economy.KeyFactory.Tick;
 
 public abstract class AbstractEvent implements Event {
-    private Key mExecuteOnTick;
-    private Key mExecutedTick;
+    private Tick mExecuteOnTick;
+    private Tick mExecutedTick;
     private boolean mSuccess;
     
-    public AbstractEvent(Key tickToExecute) {
+    public AbstractEvent(Tick tickToExecute) {
         mExecuteOnTick = tickToExecute;
         mExecutedTick = null;
         mSuccess = false;
     }
 
     @Override
-    public Key getExecuteOnTick() {
+    public Tick getExecuteOnTick() {
         return mExecuteOnTick;
     }
     
-    public Key getExecutedOnTick() {
+    public Tick getExecutedOnTick() {
         return mExecutedTick;
     }
     

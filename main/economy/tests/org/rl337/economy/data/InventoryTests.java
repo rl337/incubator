@@ -1,15 +1,24 @@
 package org.rl337.economy.data;
 
-import org.rl337.economy.data.Inventory.InventoryItem;
+import java.io.File;
 
 import junit.framework.TestCase;
 
+import org.rl337.economy.SerializationUtil;
+import org.rl337.economy.data.Inventory.InventoryItem;
+
 public class InventoryTests extends TestCase {
     private Inventory mInventory;
+    private File mFile;
     
     
-    public void setUp() {
+    public void setUp() throws Exception {
         mInventory = new Inventory();
+        mFile = File.createTempFile("InventoryTests", ".txt");
+    }
+    
+    public void tearDown() throws Exception {
+        mFile.delete();
     }
     
     public void testGiveHasAndTake() {
@@ -44,6 +53,18 @@ public class InventoryTests extends TestCase {
         
         mInventory.give(Resource.Food, 2);
         assertEquals("If we had previously given -5 and then we give 2, we should have 2.", 2, mInventory.amount(Resource.Food));
+    }
+    
+    public void testLoadAndSave() {
+        mInventory.give(Resource.Food, 5);
+        mInventory.give(Resource.Perishables, 3);
+        
+        SerializationUtil.write(mInventory, mFile);
+        
+        Inventory newInventory = SerializationUtil.load(Inventory.class, mFile);
+        assertEquals("inventory should have 5 food", 5, newInventory.amount(Resource.Food));
+        assertEquals("inventory should have 3 Perishables", 3, newInventory.amount(Resource.Perishables));
+        assertEquals("inventory should not have unknowns", 0, newInventory.amount(Resource.Unknown));
     }
 
 }

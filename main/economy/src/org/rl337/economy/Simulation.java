@@ -1,73 +1,61 @@
 package org.rl337.economy;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
-import org.rl337.economy.KeyFactory.Key;
+import org.rl337.economy.KeyFactory.EntityKey;
 import org.rl337.economy.KeyFactory.KeyType;
+import org.rl337.economy.KeyFactory.Tick;
 import org.rl337.economy.data.Market;
 import org.rl337.economy.data.entity.Entity;
 import org.rl337.economy.event.Event;
 
+import com.google.inject.Inject;
+
 public class Simulation implements SimulationProxy {
-    private HashMap<String, Entity> mEntities;
-    private KeyFactory mKeyFactory;
-    private EntityFactory mEntityFactory;
+    @Inject 
     private EventLoop mEventLoop;
+    @Inject
     private Market mMarket;
+    @Inject
+    private KeyFactory mKeyFactory;
+    @Inject
+    private EntityFactory mEntityFactory;
     
-    public Simulation() {
-        mEntities = new HashMap<String, Entity>();
-        mKeyFactory = new KeyFactory();
-        mEntityFactory = new EntityFactory(mKeyFactory);
-        mEventLoop = new EventLoop(this);
-        mMarket = new Market(mKeyFactory);
-    }
-    
-    public boolean addEntity(String name) {
+    public EntityKey addEntity(String name) {
         
         if (name == null || name.length() < 1) {
-            return false;
-        }
-        if (mEntities.containsKey(name)) {
-            return false;
-        }
-        
-        Entity e = mEntityFactory.newEntity(name);
-        mEntities.put(e.getName(), e);
-        
-        return true;
-    }
-    
-    public Entity removeEntity(String name) {
-        if (!mEntities.containsKey(name)) {
             return null;
         }
         
-        return mEntities.remove(name);
+        Entity e = mEntityFactory.newEntity(name);
+        
+        return e.getKey();
     }
     
-    public List<Entity> getEntities() {
-        return new ArrayList<Entity>(mEntities.values());
+    public Entity removeEntity(EntityKey key) {
+        return mEntityFactory.remove(key);
+    }
+    
+    public List<Entity> listEntities() {
+        return mEntityFactory.listEntities();
     }
     
     public int entityCount() {
-        return mEntities.size();
+        return mEntityFactory.size();
     }
     
     public void executeTick() {
-        Key tick = mKeyFactory.newKey(KeyType.Tick);
+        Tick tick = mKeyFactory.newKey(KeyType.Tick);
 
         mMarket.executeTick(tick);
         
-        Entity[] entities = mEntities.values().toArray(new Entity[mEntities.size()]);
+        List<Entity> entities = listEntities();
         for(Entity entity : entities) {
             Event e = entity.getEvent(tick);
             
             // This entity died this turn. Remove it.
             if (!entity.isAlive()) {
-                mEntities.remove(entity.getName());
+                mEntityFactory.remove(entity.getKey());
             }
             
             if (e != null) {
@@ -86,7 +74,7 @@ public class Simulation implements SimulationProxy {
     }
 
     @Override
-    public Key getCurrentTick() {
+    public Tick getCurrentTick() {
         return mKeyFactory.currentKey(KeyType.Tick);
     }
 

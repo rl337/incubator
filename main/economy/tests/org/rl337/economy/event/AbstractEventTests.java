@@ -1,15 +1,18 @@
 package org.rl337.economy.event;
 
-import org.rl337.economy.SimulationProxy;
-import org.rl337.economy.KeyFactory.Key;
-import org.rl337.economy.KeyFactory.KeyType;
-import org.rl337.economy.event.AbstractEvent;
-import org.rl337.economy.event.Event;
-import org.rl337.economy.event.Event.EventException;
-
 import junit.framework.TestCase;
 
+import org.rl337.economy.KeyFactory;
+import org.rl337.economy.SimulationProxy;
+import org.rl337.economy.KeyFactory.EntityKey;
+import org.rl337.economy.KeyFactory.KeyType;
+import org.rl337.economy.KeyFactory.Tick;
+import org.rl337.economy.event.Event.EventException;
+
 public class AbstractEventTests extends TestCase {
+    
+    public void setUp() {
+    }
 
     public void testExecute() throws Exception {
         TestSimulationProxy proxy = new TestSimulationProxy();
@@ -46,6 +49,11 @@ public class AbstractEventTests extends TestCase {
     }
     
     private static class TestSimulationProxy implements SimulationProxy {
+        private KeyFactory mKeyFactory;
+        
+        public TestSimulationProxy() {
+            mKeyFactory = new KeyFactory();
+        }
 
         @Override
         public boolean addEvent(Event e) {
@@ -53,13 +61,13 @@ public class AbstractEventTests extends TestCase {
         }
 
         @Override
-        public Key getCurrentTick() {
-            return new Key(KeyType.Tick, 0);
+        public Tick getCurrentTick() {
+            return mKeyFactory.currentKey(KeyType.Tick);
         }
 
         @Override
-        public boolean addEntity(String entityName) {
-            return false;
+        public EntityKey addEntity(String entityName) {
+            return null;
         }
         
     }
@@ -67,7 +75,7 @@ public class AbstractEventTests extends TestCase {
     private static class TestEvent extends AbstractEvent {
         private boolean mThrowsException;
         
-        public TestEvent(Key tickToExecute, boolean except) {
+        public TestEvent(Tick tickToExecute, boolean except) {
             super(tickToExecute);
             mThrowsException = except;
         }

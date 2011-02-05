@@ -1,8 +1,10 @@
 package org.rl337.economy.data.entity;
 
 import java.util.Random;
+
 import org.rl337.economy.SimulationProxy;
-import org.rl337.economy.KeyFactory.Key;
+import org.rl337.economy.KeyFactory.EntityKey;
+import org.rl337.economy.KeyFactory.Tick;
 import org.rl337.economy.data.Inventory;
 import org.rl337.economy.data.Resource;
 import org.rl337.economy.data.Inventory.InventoryItem;
@@ -11,25 +13,44 @@ import org.rl337.economy.event.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
 public class Entity {
     private static final Logger smLogger = LoggerFactory.getLogger(Entity.class);
     private static final Random smRandom = new Random();
 
+    @Expose @SerializedName("key")
+    private EntityKey mKey;
+    @Expose @SerializedName("name")
     private String mName;
+    @Expose @SerializedName("happiness")
     private int mHappiness;
+    @Expose @SerializedName("credits")
     private int mCredits;
+    @Expose @SerializedName("inventory")
     private Inventory mInventory;
-    private Key mBornTick;
+    @Expose @SerializedName("born")
+    private Tick mBornTick;
+    @Expose @SerializedName("alive")
     private boolean mAlive;
-
-    public Entity(String name, Key tick) {
-        mName = name;
+    
+    public Entity() {
         mInventory = new Inventory();
         mHappiness = 300;
         mCredits = 0;
-        mBornTick = tick;
         mAlive = true;
+    }
+
+    public Entity(EntityKey key, String name, Tick tick) {
+        this();
+        mKey = key;
+        mName = name;
+        mBornTick = tick;
+    }
+    
+    public EntityKey getKey() {
+        return mKey;
     }
     
     public String getName() {
@@ -84,7 +105,7 @@ public class Entity {
         mAlive = false;
     }
     
-    public Event getEvent(Key tick) {
+    public Event getEvent(Tick tick) {
 
         // once we reach 10000 we remove ourselves
         if (mAlive && tick.getValue() - mBornTick.getValue() > 10000) {

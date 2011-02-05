@@ -6,8 +6,9 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.rl337.economy.KeyFactory;
-import org.rl337.economy.KeyFactory.Key;
+import org.rl337.economy.KeyFactory.EntityKey;
 import org.rl337.economy.KeyFactory.KeyType;
+import org.rl337.economy.KeyFactory.Tick;
 import org.rl337.economy.data.Market.Bid;
 import org.rl337.economy.data.entity.Entity;
 import org.rl337.economy.data.entity.MarketUser;
@@ -20,9 +21,20 @@ public class MarketTests extends TestCase {
     
     public void setUp() {
         mFactory = new KeyFactory();
-        mMarket = new Market(mFactory);
-        mBuyer = new TestMarketUser("Buyer", mFactory.currentKey(KeyType.Tick));
-        mSeller = new TestMarketUser("Seller", mFactory.currentKey(KeyType.Tick));
+        mMarket = new Market();
+        mMarket.initialize(mFactory);
+        
+        mBuyer = new TestMarketUser(
+            (EntityKey) mFactory.newKey(KeyType.Entity), 
+            "Buyer", 
+            (Tick) mFactory.currentKey(KeyType.Tick)
+        );
+        
+        mSeller = new TestMarketUser(
+            (EntityKey) mFactory.newKey(KeyType.Entity),
+            "Seller",
+            (Tick) mFactory.currentKey(KeyType.Tick)
+        );
     }
     
     public void testSimpleOfferAndBuy() {
@@ -153,14 +165,18 @@ public class MarketTests extends TestCase {
         assertEquals("Buyer should have had no sells", 0, mBuyer.getSells().size());
     }
     
+    public void testSaveAndLoad() {
+        
+    }
+    
     private static class TestMarketUser extends Entity implements MarketUser {
         private ArrayList<TestExecution> mBuys;
         private ArrayList<TestExecution> mSells;
         private ArrayList<Market.Bid> mBuyExpirations;
         private ArrayList<Market.Bid> mSellExpirations; 
 
-        public TestMarketUser(String name, Key tick) {
-            super(name, tick);
+        public TestMarketUser(EntityKey key, String name, Tick tick) {
+            super(key, name, tick);
             mBuys = new ArrayList<TestExecution>();
             mSells = new ArrayList<TestExecution>();
             mBuyExpirations = new ArrayList<Bid>();

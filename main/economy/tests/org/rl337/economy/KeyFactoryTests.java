@@ -43,10 +43,11 @@ public class KeyFactoryTests extends TestCase {
         for(int i = 0; i < entityCount; i++) mFactory.newKey(KeyType.Entity);
         for(int i = 0; i < tickCount; i++) mFactory.newKey(KeyType.Tick);
         
-        assertTrue("save() should return true.", KeyFactory.save(mFile, mFactory));
+        assertTrue("save() should return true.", mFactory.save(mFile));
         
-        KeyFactory newFactory = KeyFactory.loadFile(mFile);
-        assertNotNull("load() should have returned returned non-null.", newFactory);
+        KeyFactory newFactory = new KeyFactory();
+        
+        assertTrue("load() should have returned true", newFactory.load(mFile));
         
         assertEquals("bid key should be " + bidCount, bidCount, newFactory.currentKey(KeyType.Bid).getValue());
         assertEquals("entity key should be " + entityCount, entityCount, newFactory.currentKey(KeyType.Entity).getValue());

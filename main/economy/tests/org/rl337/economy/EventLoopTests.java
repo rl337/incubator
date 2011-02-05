@@ -1,26 +1,41 @@
 package org.rl337.economy;
 
 
+import junit.framework.TestCase;
+
+import org.rl337.economy.KeyFactory.EntityKey;
 import org.rl337.economy.KeyFactory.Key;
 import org.rl337.economy.KeyFactory.KeyType;
+import org.rl337.economy.KeyFactory.Tick;
 import org.rl337.economy.event.Event;
 
-import junit.framework.TestCase;
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
 
 public class EventLoopTests extends TestCase {
     private EventLoop mEventLoop;
-    private SimulationProxy mSimulationProxy;
     private KeyFactory mKeyFactory;
     
     public void setUp() {
-        mKeyFactory = new KeyFactory();
-        mSimulationProxy = new TestSimulationProxy(mKeyFactory);
-        mEventLoop = new EventLoop(mSimulationProxy);
+        
+        Injector testInjector = Guice.createInjector(new AbstractModule() {
+                @Override
+                protected void configure() {
+                    bind(KeyFactory.class).asEagerSingleton();
+                    bind(SimulationProxy.class).to(TestSimulationProxy.class);
+                }
+            }
+        );
+        
+        mEventLoop = testInjector.getInstance(EventLoop.class);
+        mKeyFactory = testInjector.getInstance(KeyFactory.class);
     }
 
     public void testAddEventSimple() {
         System.out.println("Start of test");
-        TestEvent event = new TestEvent(new Key(KeyType.Tick, 4));
+        TestEvent event = new TestEvent(new Tick(4));
 
         assertTrue("Add at tick 3 should work.", mEventLoop.addEvent(event));
         assertFalse("Add of null should return false", mEventLoop.addEvent(null));
@@ -28,8 +43,8 @@ public class EventLoopTests extends TestCase {
         assertEquals("Tick 1 should have no events.", 0, mEventLoop.executeTick(mKeyFactory.newKey(KeyType.Tick)));
         assertEquals("Tick 2 should have no events.", 0, mEventLoop.executeTick(mKeyFactory.newKey(KeyType.Tick)));
 
-        assertFalse("Add of event with current tick should return false", mEventLoop.addEvent(new TestEvent(new Key(KeyType.Tick, 2))));
-        assertFalse("Add of event with historic tick should return false", mEventLoop.addEvent(new TestEvent(new Key(KeyType.Tick, 1))));
+        assertFalse("Add of event with current tick should return false", mEventLoop.addEvent(new TestEvent(new Tick(2))));
+        assertFalse("Add of event with historic tick should return false", mEventLoop.addEvent(new TestEvent(new Tick(1))));
 
         assertEquals("Tick 3 should have no events.", 0, mEventLoop.executeTick(mKeyFactory.newKey(KeyType.Tick)));
         assertEquals("Tick 4 should have 1 event.", 1, mEventLoop.executeTick(mKeyFactory.newKey(KeyType.Tick)));
@@ -40,10 +55,10 @@ public class EventLoopTests extends TestCase {
     }
 
     private static class TestEvent implements Event {
-        private Key mExecutionTick;
-        private Key mExecutedTick;
+        private Tick mExecutionTick;
+        private Tick mExecutedTick;
 
-        public TestEvent(Key tick) {
+        public TestEvent(Tick tick) {
             mExecutionTick = tick;
             mExecutedTick = null;
         }
@@ -54,7 +69,7 @@ public class EventLoopTests extends TestCase {
         }
 
         @Override
-        public Key getExecuteOnTick() {
+        public Tick getExecuteOnTick() {
             return mExecutionTick;
         }
 
@@ -65,26 +80,22 @@ public class EventLoopTests extends TestCase {
     }
     
     private static class TestSimulationProxy implements SimulationProxy {
+        @Inject
         private KeyFactory mKeyFactory;
         
-        public TestSimulationProxy(KeyFactory f) {
-            mKeyFactory = f;
-        }
-
         @Override
         public boolean addEvent(Event e) {
             return false;
         }
 
         @Override
-        public Key getCurrentTick() {
+        public Tick getCurrentTick() {
             return mKeyFactory.currentKey(KeyType.Tick);
         }
 
         @Override
-        public boolean addEntity(String entityName) {
-            // TODO Auto-generated method stub
-            return false;
+        public EntityKey addEntity(String entityName) {
+            return null;
         }
         
     }

@@ -3,7 +3,11 @@ package org.rl337.economy.data;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 public class Inventory {
+    @Expose @SerializedName("inv")
     private Map<Resource, Inventory.InventoryItem> mInventory;
     
     public Inventory() {
@@ -46,8 +50,15 @@ public class Inventory {
     }
 
     public static class InventoryItem {
+        @Expose @SerializedName("qty")
         private int mQuantity;
+        @Expose @SerializedName("type")
         private Resource mType;
+        
+        public InventoryItem() {
+            mType = Resource.Unknown;
+            mQuantity = 0;
+        }
         
         public InventoryItem(Resource rType, int qty) {
             mType = rType;

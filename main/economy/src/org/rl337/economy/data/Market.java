@@ -8,22 +8,40 @@ import org.rl337.economy.KeyFactory.Key;
 import org.rl337.economy.KeyFactory.KeyType;
 import org.rl337.economy.data.entity.MarketUser;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 public class Market {
     private TreeSet<Bid> mOfferExpirations;
     private TreeSet<Bid> mBuyExpirations;
     
+    @Expose @SerializedName("offers")
     private TreeSet<Bid> mOffers;
+
+    @Expose @SerializedName("buys")
     private TreeSet<Bid> mBuys;
     
     private KeyFactory mKeyFactory;
     
-    public Market(KeyFactory keyFactory) {
+    public Market() {
         mOfferExpirations = new TreeSet<Bid>(new CompareByCost());
         mBuyExpirations = new TreeSet<Bid>(new CompareByCost());
-        mKeyFactory = keyFactory;
         
         mOffers = new TreeSet<Bid>(new CompareByExpirationTick());
         mBuys = new TreeSet<Bid>(new CompareByExpirationTick());
+        
+        mKeyFactory = null;
+    }
+    
+    public void initialize(KeyFactory keyFactory) {
+        mKeyFactory = keyFactory;
+        for(Bid b : mOffers) {
+            mOfferExpirations.add(b);
+        }
+        
+        for(Bid b : mBuys) {
+            mBuyExpirations.add(b);
+        }
     }
     
     public void offer(MarketUser user, Resource resource, int qty, int cost, long exp) {
@@ -154,12 +172,25 @@ public class Market {
     }
 
     public static class Bid {
+        @Expose @SerializedName("id")
         private Key mId;
+
+        @Expose @SerializedName("res")
         private MarketUser mMarketUser;
+
+        @Expose @SerializedName("res")
         private Resource mResource;
+
+        @Expose @SerializedName("qty")
         private int mQuantity;
+
+        @Expose @SerializedName("left")
         private int mQtyLeft;
+
+        @Expose @SerializedName("cost")
         private int mCost;
+
+        @Expose @SerializedName("exp")
         private long mExpiration;
         
         private Bid(Key key, MarketUser e, Resource r, int q, int c, long expiresOn) {
