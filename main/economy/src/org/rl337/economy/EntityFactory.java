@@ -10,13 +10,21 @@ import org.rl337.economy.KeyFactory.EntityKey;
 import org.rl337.economy.KeyFactory.KeyType;
 import org.rl337.economy.KeyFactory.Tick;
 import org.rl337.economy.data.entity.Entity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.google.gson.reflect.TypeToken;
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
+import com.google.inject.util.Types;
 
 public class EntityFactory {
+    private static final Logger smLogger = LoggerFactory.getLogger(EntityFactory.class);
+    
     @Inject
     private KeyFactory mKeyFactory;
+    
+    @SuppressWarnings("unchecked") @Inject @Named("entityFactory.entityClass")
+    private Class mEntityClass;
     
     private HashMap<String, Entity> mEntities;
     
@@ -28,15 +36,18 @@ public class EntityFactory {
         return mEntities.get(key.toString());
     }
     
-    public boolean load(File file) {
-        Type mapType = new TypeToken<HashMap<String, Entity>>(){}.getType();
+    @SuppressWarnings("unchecked")
+    public <T extends Entity> boolean load(File file) {
+        Type mapType = Types.newParameterizedType(HashMap.class, String.class, mEntityClass);
         
-        HashMap<String, Entity> result = SerializationUtil.load(mapType, file);
+        HashMap<String, T> result = SerializationUtil.load(mapType, file);
         if (result == null) {
+            smLogger.warn("Could not load file: " + file);
             return false;
         }
         
-        mEntities = result;
+        
+        mEntities = (HashMap<String, Entity>) result;
         
         return true;
     }
@@ -49,10 +60,21 @@ public class EntityFactory {
     public Entity newEntity(String name) {
         EntityKey k = mKeyFactory.newKey(KeyType.Entity);
         Tick t = mKeyFactory.currentKey(KeyType.Tick);
-        Entity e = new Entity(k, name, t);
-        mEntities.put(k.toString(), e);
         
-        return e;
+        Entity entity = null;
+        try {
+            entity = (Entity) mEntityClass.newInstance();
+            entity.setKey(k);
+            entity.setName(name);
+            entity.setBornOnTick(t);
+            mEntities.put(k.toString(), entity);
+        } catch (InstantiationException e) {
+            smLogger.error("Could not instantiate entity of type: " + mEntityClass.getName(), e);
+        } catch (IllegalAccessException e) {
+            smLogger.error("Could not access entity of type: " + mEntityClass.getName(), e);
+        }
+        
+        return entity;
     }
     
     public Entity remove(EntityKey key) {

@@ -256,6 +256,10 @@ public class KeyFactory {
         public Tick(long tick) {
             super(KeyType.Tick, tick);
         }
+
+        public Tick getFutureTick(int i) {
+            return new Tick(getValue() + i);
+        }
     }
     
     public static class BidKey extends Key {

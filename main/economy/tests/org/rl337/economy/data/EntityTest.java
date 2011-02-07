@@ -8,10 +8,12 @@ import org.rl337.economy.EntityFactory;
 import org.rl337.economy.KeyFactory;
 import org.rl337.economy.SerializationUtil;
 import org.rl337.economy.data.entity.Entity;
+import org.rl337.economy.data.entity.MarketUserImpl;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.name.Names;
 
 public class EntityTest extends TestCase {
     private File mFile;
@@ -24,6 +26,8 @@ public class EntityTest extends TestCase {
                 @Override
                 protected void configure() {
                     bind(KeyFactory.class).asEagerSingleton();
+                    bind(Entity.class).to(MarketUserImpl.class);
+                    bind(Class.class).annotatedWith(Names.named("entityFactory.entityClass")).toInstance(MarketUserImpl.class);
                 }
             }
         );
@@ -42,7 +46,7 @@ public class EntityTest extends TestCase {
         
         assertTrue("Entity write should return true.", SerializationUtil.write(e, mFile));
         
-        Entity gotEntity = SerializationUtil.load(Entity.class, mFile);
+        Entity gotEntity = SerializationUtil.load(MarketUserImpl.class, mFile);
         
         assertEntityEquals(e, gotEntity);
     }

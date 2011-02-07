@@ -51,22 +51,21 @@ public class Simulation implements SimulationProxy {
         
         List<Entity> entities = listEntities();
         for(Entity entity : entities) {
-            Event e = entity.getEvent(tick);
-            
             // This entity died this turn. Remove it.
             if (!entity.isAlive()) {
                 mEntityFactory.remove(entity.getKey());
+                continue;
             }
             
+            Event e = entity.getEvent(tick);
             if (e != null) {
                 addEvent(e);
             }
         }
         
-        
         int executed = mEventLoop.executeTick(tick);
-        
-        System.out.println("Executed " + executed + " events on tick " + tick);
+        int entityCount = entities.size();
+        System.out.println("Executed " + executed + " events on tick " + tick + " for " + entityCount + " entities");
     }
 
     public boolean addEvent(Event e) {

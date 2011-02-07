@@ -5,10 +5,12 @@ import java.io.File;
 import junit.framework.TestCase;
 
 import org.rl337.economy.data.entity.Entity;
+import org.rl337.economy.data.entity.MarketUserImpl;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.name.Names;
 
 public class EntityFactoryTests extends TestCase {
     private File mFile;
@@ -21,6 +23,7 @@ public class EntityFactoryTests extends TestCase {
                 @Override
                 protected void configure() {
                     bind(KeyFactory.class).asEagerSingleton();
+                    bind(Class.class).annotatedWith(Names.named("entityFactory.entityClass")).toInstance(MarketUserImpl.class);
                 }
             }
         );
@@ -49,7 +52,7 @@ public class EntityFactoryTests extends TestCase {
         
         EntityFactory newFactory = mInjector.getInstance(EntityFactory.class);
         assertTrue("New instance should not be the same as old instance.", mEntityFactory != newFactory);
-        assertTrue("loading should return true", newFactory.load(mFile));
+        assertTrue("loading should return true",  newFactory.<MarketUserImpl>load(mFile));
         
         Entity entity1b = mEntityFactory.get(entity1.getKey());
         Entity entity2b = mEntityFactory.get(entity2.getKey());
