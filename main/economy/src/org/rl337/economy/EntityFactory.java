@@ -40,12 +40,11 @@ public class EntityFactory {
     public <T extends Entity> boolean load(File file) {
         Type mapType = Types.newParameterizedType(HashMap.class, String.class, mEntityClass);
         
-        HashMap<String, T> result = SerializationUtil.load(mapType, file);
+        HashMap<String, T> result = SerializationUtil.loadJSON(mapType, file);
         if (result == null) {
             smLogger.warn("Could not load file: " + file);
             return false;
         }
-        
         
         mEntities = (HashMap<String, Entity>) result;
         
@@ -53,7 +52,7 @@ public class EntityFactory {
     }
     
     public boolean save(File file) {
-        return SerializationUtil.write(mEntities, file);
+        return SerializationUtil.writeJSON(mEntities, file);
     }
 
     

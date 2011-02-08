@@ -183,6 +183,40 @@ public class MarketTests extends TestCase {
     
     public void testSaveAndLoad() {
         
+        // same test as SimpleOfferAndBuy but we're going to write out the Market, create a new one
+        // then use the new one in the test.
+        
+        mMarket.offer(mSeller.getKey(), Resource.Food, 10, 250, 50);
+        mMarket.buy(mBuyer.getKey(), Resource.Food, 10, 250, 50);
+        
+        assertTrue("market save should have returned true", mMarket.save(mFile));
+        Market newMarket = mInjector.getInstance(Market.class);
+        assertTrue("new market object load should have returned true", newMarket.load(mFile));
+        
+        
+        // This should have triggered a buy.
+        newMarket.executeTick(mKeyFactory.newKey(KeyType.Tick));
+        assertEquals("market should have no more active buys", 0, newMarket.getActiveBuys().length);
+        assertEquals("market should have no more active sells", 0, newMarket.getActiveOffers().length);
+        
+        List<TestExecution> sellerSells = mSeller.getSells();
+        List<TestExecution> buyerBuys = mBuyer.getBuys();
+        assertEquals("Seller should have no buys.", 0, mSeller.getBuys().size());
+        assertEquals("Seller should have one sell.", 1, sellerSells.size());
+        assertEquals("Buyer should have one buy.", 1, buyerBuys.size());
+        assertEquals("Seller should have no sells.", 0, mBuyer.getSells().size());
+        
+        TestExecution buy = buyerBuys.get(0);
+        assertEquals("Buyer in buy exeuction should be buyer", mBuyer.getKey(), buy.buy.getEntityKey());
+        assertEquals("Buy should have executed for a qty of 10", 10, buy.qty);
+        assertEquals("Buy's bid should have nothing in QtyLeft", 0, buy.buy.getQuantityLeft());
+        assertEquals("Seller in buy exeuction should be seller", mSeller.getKey(), buy.offer.getEntityKey());
+
+        TestExecution sell = sellerSells.get(0);
+        assertEquals("Buyer in buy exeuction should be buyer", mBuyer.getKey(), sell.buy.getEntityKey());
+        assertEquals("Seller in buy exeuction should be seller", mSeller.getKey(), sell.offer.getEntityKey());
+        assertEquals("Sell should have executed for a qty of 10", 10, sell.qty);
+        assertEquals("Seller's bid should have nothing in QtyLeft", 0, sell.offer.getQuantityLeft());
     }
     
     public static class TestMarketUser extends MarketUserImpl implements MarketUser {

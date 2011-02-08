@@ -1,11 +1,13 @@
 package org.rl337.economy;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import org.rl337.economy.KeyFactory.Key;
 import org.rl337.economy.KeyFactory.Tick;
+import org.rl337.economy.data.entity.Entity;
 import org.rl337.economy.event.Event;
 import org.rl337.economy.event.Event.EventException;
 
@@ -76,5 +78,21 @@ public class EventLoop {
     public boolean isIdle() {
         return mEventMap.isEmpty();
     }
+
+    public <T extends Entity> boolean load(File file) {
+        HashMap<Key, List<Event>> eventMap = SerializationUtil.loadBinary(file);
+        
+        if (eventMap == null) {
+            return false;
+        }
+        
+        mEventMap = eventMap;
+        return true;
+    }
+    
+    public boolean save(File file) {
+        return SerializationUtil.writeBinary(mEventMap, file);
+    }
+
 
 }

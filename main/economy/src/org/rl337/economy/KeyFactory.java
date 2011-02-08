@@ -1,6 +1,7 @@
 package org.rl337.economy;
 
 import java.io.File;
+import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
@@ -26,7 +27,7 @@ public class KeyFactory {
         
         Type mapType = new TypeToken<HashMap<KeyType, KeyCounter>>(){}.getType();
         
-        HashMap<KeyType, KeyCounter> result = SerializationUtil.load(mapType, file);
+        HashMap<KeyType, KeyCounter> result = SerializationUtil.loadJSON(mapType, file);
         if (result == null) {
             return false;
         }
@@ -37,7 +38,7 @@ public class KeyFactory {
     }
     
     public boolean save(File file) {
-        return SerializationUtil.write(mCounters, file);
+        return SerializationUtil.writeJSON(mCounters, file);
     }
     
     private KeyCounter getKeyCounter(KeyType kt) {
@@ -119,7 +120,7 @@ public class KeyFactory {
         }
     }
     
-    public static enum KeyType implements Comparable<KeyType> {
+    public static enum KeyType implements Comparable<KeyType>, Serializable {
         Unknown("XXX", UnknownKey.class),
         Tick("TIC", Tick.class),
         Bid("BID", BidKey.class),
@@ -190,7 +191,9 @@ public class KeyFactory {
         }
     }
     
-    public static class Key implements Comparable<Key> {
+    public static class Key implements Comparable<Key>, Serializable {
+        private static final long serialVersionUID = -5319267928901862651L;
+
         @Expose @SerializedName("v")
         private long mValue;
         @Expose @SerializedName("k")
@@ -249,6 +252,8 @@ public class KeyFactory {
     }
     
     public static class Tick extends Key {
+        private static final long serialVersionUID = 5792627088312990238L;
+
         public Tick(){
             this(-1);
         }
@@ -263,6 +268,8 @@ public class KeyFactory {
     }
     
     public static class BidKey extends Key {
+        private static final long serialVersionUID = 4714185849595210086L;
+
         public BidKey(){
             this(-1);
         }
@@ -273,6 +280,8 @@ public class KeyFactory {
     }
     
     public static class EntityKey extends Key {
+        private static final long serialVersionUID = 312731308657126915L;
+
         public EntityKey(){
             this(-1);
         }
@@ -283,6 +292,8 @@ public class KeyFactory {
     }
     
     public static class UnknownKey extends Key {
+        private static final long serialVersionUID = -5202682028307959725L;
+
         public UnknownKey(){
             this(-1);
         }

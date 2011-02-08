@@ -18,6 +18,7 @@ public interface Entity {
     void setBornOnTick(Tick tick);
 
     void give(Resource type, int qty);
+    boolean has(Resource type, int qty);
 
     InventoryItem take(Resource type, int qty);
 

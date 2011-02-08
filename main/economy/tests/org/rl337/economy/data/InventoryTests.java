@@ -59,9 +59,9 @@ public class InventoryTests extends TestCase {
         mInventory.give(Resource.Food, 5);
         mInventory.give(Resource.Perishables, 3);
         
-        SerializationUtil.write(mInventory, mFile);
+        SerializationUtil.writeJSON(mInventory, mFile);
         
-        Inventory newInventory = SerializationUtil.load(Inventory.class, mFile);
+        Inventory newInventory = SerializationUtil.loadJSON(Inventory.class, mFile);
         assertEquals("inventory should have 5 food", 5, newInventory.amount(Resource.Food));
         assertEquals("inventory should have 3 Perishables", 3, newInventory.amount(Resource.Perishables));
         assertEquals("inventory should not have unknowns", 0, newInventory.amount(Resource.Unknown));

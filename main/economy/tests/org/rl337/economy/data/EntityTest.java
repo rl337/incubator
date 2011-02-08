@@ -44,9 +44,9 @@ public class EntityTest extends TestCase {
     public void testEntityLoadAndSave() {
         Entity e = mEntityFactory.newEntity("blargle");
         
-        assertTrue("Entity write should return true.", SerializationUtil.write(e, mFile));
+        assertTrue("Entity write should return true.", SerializationUtil.writeJSON(e, mFile));
         
-        Entity gotEntity = SerializationUtil.load(MarketUserImpl.class, mFile);
+        Entity gotEntity = SerializationUtil.loadJSON(MarketUserImpl.class, mFile);
         
         assertEntityEquals(e, gotEntity);
     }

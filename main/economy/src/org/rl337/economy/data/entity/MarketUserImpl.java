@@ -71,6 +71,10 @@ public class MarketUserImpl implements MarketUser {
         return mInventory.take(type, qty);
     }
     
+    public boolean has(Resource type, int qty) {
+        return mInventory.has(type, qty);
+    }
+    
     /* (non-Javadoc)
      * @see org.rl337.economy.data.entity.Entity#getHappiness()
      */
@@ -144,6 +148,7 @@ public class MarketUserImpl implements MarketUser {
     /* (non-Javadoc)
      * @see org.rl337.economy.data.entity.Entity#getEvent(org.rl337.economy.KeyFactory.Tick)
      */
+    @SuppressWarnings("serial")
     public Event getEvent(Tick tick) {
 
         // once we reach 10000 we remove ourselves
@@ -156,18 +161,18 @@ public class MarketUserImpl implements MarketUser {
         
         // If we're really happy, we are gonna just do nothing but become just slightly less happy.
         if (mHappiness > 1024) {
-            return new AbstractEvent(nextTick) {
+            return new AbstractEvent(mKey, nextTick) {
                 @Override
-                public void protectedExecute(SimulationProxy p) throws Exception { 
+                public void protectedExecute(Entity e, SimulationProxy p) throws Exception { 
                     
                     smLogger.debug(mName + " is happy.");
                     
                     if (smRandom.nextInt() % 5 == 0) {
-                        smLogger.debug(mName + " decided to divide");
-                        mHappiness = mHappiness / 4;
-                        p.addEntity(mName + "-" + Long.toString(p.getCurrentTick().getValue()));
+                        smLogger.debug(e.getName() + " decided to divide");
+                        e.setHappiness(e.getHappiness() / 4);
+                        p.addEntity(e.getName() + "-" + Long.toString(p.getCurrentTick().getValue()));
                     }
-                    mHappiness--;
+                    e.makeSad(1);
                 }
             };
         }
@@ -175,33 +180,33 @@ public class MarketUserImpl implements MarketUser {
         // If we have less than 1024 happiness, we want to eat something... but if we have no food
         // in inventory, we want to convert Perishables to Food... and if we have no perishables
         // we want to forage.. which gives us perishables.
-        return new AbstractEvent(nextTick) {
-            public void protectedExecute(SimulationProxy p) throws Exception {
-                if (mInventory.has(Resource.Food, 1)) {
-                    InventoryItem food = mInventory.take(Resource.Food, 1);
+        return new AbstractEvent(mKey, nextTick) {
+            public void protectedExecute(Entity e, SimulationProxy p) throws Exception {
+                if (e.has(Resource.Food, 1)) {
+                    InventoryItem food = e.take(Resource.Food, 1);
                     if (food != null) {
                         smLogger.debug(mName + " eats a food");
-                        mHappiness += 16; // eating gives us 16 happiness.
+                        e.makeHappy(16); // eating gives us 16 happiness.
                     }
                 } else {
                     // we had no food, let's convert perishables to food
                     // it takes 4 perishables to make 1 food.
-                    InventoryItem perishable = mInventory.take(Resource.Perishables, 4);
+                    InventoryItem perishable = e.take(Resource.Perishables, 4);
                     if (perishable != null) {
                         smLogger.debug(mName + " converted Perishables into food.");
-                        mInventory.give(Resource.Food, 1);
+                        e.give(Resource.Food, 1);
                     } else {
                         // We had no food and we don't have enough perishables... we have to forage.
                         // When foraging we have a 1/3 chance of finding Perishables
                         if (smRandom.nextInt() % 3 == 0) { 
                             smLogger.debug(mName + " foraged and found a perishable");
-                            mInventory.give(Resource.Perishables, 1);
+                            e.give(Resource.Perishables, 1);
                         } else {
                             smLogger.debug(mName + " foraged but found nothing.");
                         }
                     }
                 }
-                mHappiness--;
+                e.makeSad(1);
             }
         };
     }

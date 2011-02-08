@@ -1,10 +1,13 @@
 package org.rl337.economy.data;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.TreeSet;
 
 import org.rl337.economy.EntityFactory;
 import org.rl337.economy.KeyFactory;
+import org.rl337.economy.SerializationUtil;
 import org.rl337.economy.KeyFactory.EntityKey;
 import org.rl337.economy.KeyFactory.Key;
 import org.rl337.economy.KeyFactory.KeyType;
@@ -38,16 +41,46 @@ public class Market {
         mBuys = new TreeSet<Bid>(new CompareByExpirationTick());
     }
     
-    public void initialize(KeyFactory keyFactory) {
-        mKeyFactory = keyFactory;
-        for(Bid b : mOffers) {
-            mOfferExpirations.add(b);
+    public boolean save(File f) {
+        MarketSave root = new MarketSave();
+        root.offers = mOffers;
+        root.buys = mBuys;
+        
+        return SerializationUtil.writeJSON(root, f);
+    }
+    
+    public boolean load(File file) {
+        //Type setType = Types.newParameterizedType(TreeSet.class, Bid.class);
+        //Type listType = Types.arrayOf(setType);
+
+        MarketSave root = SerializationUtil.loadJSON(MarketSave.class, file);
+        
+        if(root == null) {
+            return false;
+        }
+        
+        mOffers = root.offers;
+        mBuys = root.buys;
+        
+        for(Bid s : mOffers) {
+            mOfferExpirations.add(s);
         }
         
         for(Bid b : mBuys) {
             mBuyExpirations.add(b);
         }
+
+        return true;
     }
+    
+    public static class MarketSave {
+        @Expose @SerializedName("offers")
+        TreeSet<Bid> offers;
+        @Expose @SerializedName("buys")
+        TreeSet<Bid> buys;
+    }
+
+
     
     public void offer(EntityKey entityKey, Resource resource, int qty, int cost, long exp) {
         Bid offer = newBid(entityKey, resource, qty, cost, exp);
@@ -220,7 +253,7 @@ public class Market {
         return mOffers.toArray(new Bid[mOffers.size()]);
     }
 
-    public static class Bid {
+    public static class Bid implements Comparable<Bid> {
         @Expose @SerializedName("id")
         private Key mId;
 
@@ -241,6 +274,10 @@ public class Market {
 
         @Expose @SerializedName("exp")
         private long mExpiration;
+        
+        public Bid() {
+            
+        }
         
         private Bid(Key key, EntityKey e, Resource r, int q, int c, long expiresOn) {
             mId = key;
@@ -287,6 +324,12 @@ public class Market {
         
         public int getCost() {
             return mCost;
+        }
+
+        @Override
+        public int compareTo(Bid other) {
+            Key otherKey = other.getKey();
+            return otherKey.compareTo(getKey());
         }
     }
     
