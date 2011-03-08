@@ -1,0 +1,57 @@
+
+The entire distribution, once unpacked should have the following
+files:
+
+   INSTALL                    This text
+   muxbotadm                  muxbot administration script
+   conf/                      empty configuration directory
+   example/                   directory containing example config files
+      muxbot.conf.example     example muxbot configuration file
+      users.conf.example      example users configuration file
+   log/                       an empty log directory
+   run/                       an empty run directory
+   src/                       a directory containing the actual source
+      cmd.pl
+      ctcp.pl
+      daemon.pl
+      exec
+      irc.pl
+      local.pl
+      muxbot.pl
+      net.pl
+      parse.pl
+      socks.pl
+      user.pl
+      exec/                   a directory containing scripts that get execed.
+         astrology.pl
+         ebay.pl
+         oth.pl
+         profile.pl
+         time.pl
+         weather.pl
+
+
+INSTALLATION
+
+   The first thing you will want to do is modify the muxbotadm script
+   and set an appropriate BOTPATH. This should be an absolute path
+   although if you plan on only running it in the top level directory
+   of the distribution, maybe setting it to . might work.
+
+   take care that all of the *PATH variables get set to places that
+   actually exist.  all variables within the script that get exported
+   are used within the bot itself to locate its internal files.
+
+   After modifying the muxbotadm script, copy the muxbot.conf.example
+   file from the examples directory into the conf directory and
+   modify the contents.  Each network defined within the muxbot.conf
+   should have a corresponding users.conf file.  Note that it's
+   perfectly acceptable to have multiple networks sharing the same
+   users.conf file. 
+
+   both the users.conf.example and the muxbot.conf.example files should
+   have extensive comments which explain their format and parameters.
+
+   once the configuration files are modified, simply run muxbotadm
+   with the "start" parameter.
+

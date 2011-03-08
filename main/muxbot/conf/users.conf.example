@@ -1,0 +1,73 @@
+# Directives
+#
+# Directives are neither group nor user definitions. they 
+# change the way things are interpreted within the file.
+#
+#  Directive           Description
+#
+# $include <file>    include permissions residing in <file>.
+#
+
+# Groups
+# format for groups are:
+# group: <group|command> [ <group|command> [ ... <group|command>]]
+#
+# all group definitions begin with a %. 
+# group definitions may be cascaded. Keep in mind that
+# when you cascade a group definition, keep the % to
+# make the determination that it is a group, not a command.
+#
+# Warning: Do not have circular group definitions. It will cause
+#          an infinite loop somewhere.
+
+# The default group is required.  It is used to provide the basic
+# permissions given to unknown users.
+
+
+%default: help whois who
+
+# Put the rest of your groups here. 
+
+%LUsers: %default 
+
+%apps:    dict quote time ebay 8ball deals sign weather calc translate
+%generic: %default %apps
+%users:   %default %apps op perms greet voice links newquote getquote
+%admin:   %users deop connect disconnect users emote link unlink
+%owner:   %admin exec reload rehash die
+
+
+# this group is because i keep adding people to '%user' not '%users'.
+%user: %users
+
+# Users
+# format for users are: 
+# handle : hostmask1 [ hostmask2 [ hostmaskN]] : group [ group2 [ groupN]] : flags
+# 
+# Flags are defined as the following:
+#   A     autoop
+#   V     autovoice
+#   G     do greeting
+#
+# So for example:
+# me: .*!usr@mydomain.com .*!lalala@myotherdomain.com : %users : VG
+# 
+# note that hostmasks follow a strict pattern of:
+#  nick!user@host
+# all 3 elements must have their own regular expression, even if it is
+# just .* which matches everything.
+#
+# Also, note that order matters. Try to put the more specific hostmasks
+# closer to the top... that way less general ones take affect first.
+
+foobar:
+	.*!foo@bar.com
+	.*!rlee@tarsonis.fiu.edu
+	.*!rlee01@aiur.fiu.edu
+	: %owner
+	: AVG
+
+
+# Keep this line in the config file. It's like necessary.
+# otherwise you loose the last entry in the config.
+End of Configuration

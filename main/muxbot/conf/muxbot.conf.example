@@ -1,0 +1,96 @@
+# Config file for Networks
+# each entry starts with a line whose first letter
+# is something other than whitespace. All subsequent
+# lines begining with whitespace are appended to
+# to the preceeding entry.
+
+# Entries have the following fields:
+# NetName: key=value : key2=value2 [: keyN=valueN ]
+#
+# currently, the following keys are needed:
+#   Name   Description
+#
+#   uid        the username used in IRC connect string
+#   server     the server we use to connect to this network
+#   port       port of the server.
+#   channel    specifies which channel the bot should join
+#   nick       nick of bot.
+#   logging    Do we log to a file?
+#   active     connect to this network on startup?  
+#   greetings  name of the dbm file to hold greetings
+#   quotes     name of the dbm file to hold channel quotes
+#   logfile    name of the file to log to
+#   users      The file that holds permissions for this network
+#   network    the type of network this net is. aim, irc, etc.
+#   prefix     this is a string used to prefix commands to the bot.
+#   links      A comma separated list of other networks to be linked
+#              at runtime.
+#   quiet      quietly ignore illegal command requests.
+#   nonotice   don't send notices. always use privmsg.
+
+#   IRC specific name/value pairs for muxbot configs are:
+
+#   name       IRC name used in connect string.
+#   key        IRC Channel key used when joining a +k channel
+#   passwd     If your IRC server requires a PASS <password>
+
+#   AIM specific name/value pairs for the muxbot config are:
+
+#   auth       authentication server to use. usually login.oscar.aol.com
+#   authport   auth port for irc, usually 5190
+#   language   language to use for aim. should be english
+#   version    what you want the muxbot to look like to the TOC server
+#   password   password for bot's AIM screen name
+#   roast      the roasting string for the password. usually Tic/Toc
+
+#   note that for the channel, AIM channel names can't use #s in them.
+
+#   any option specifying the name of a file automatically gets
+#   prefixed with a path based on the script muxbotadm.
+#   logfiles get placed in LOGPATH, config files get placed in CFGPATH
+#   and runtime files like greet info is in RUNPATH
+
+#   Note that setting a link on one net implicitly sets a link
+#   back from the net being linked back to the linking net, as
+#   links are bi-directional.
+
+#   The following values will automatically be substituted
+#   for the inidicated values.  This won't work on substring
+#   matches, though. Just be aware of them.  these values are
+#   also not case sensetive so On or on or ON will all be substituted
+#
+#   String      Value          String      Value
+#   on          1              off         0
+#   true        1              false       0
+#   yes         1              no          0
+
+
+MyNet1:
+      uid=myUid1:
+      server=server.for.my.net:
+      port=6667:
+      channel=#myChannel1:
+      key=MyChannelKey:
+      nick=myBotName:
+      name=MuxBot Yeah!:
+      logging= off:
+      prefix= !:
+      users= Net1-perms.conf:
+      active= no:
+      links= MyNet2
+
+MyNet2:
+      uid = myUID2:
+      server = server.for.my2.net:
+      port = 6667:
+      prefix=@:
+      channel = #myOtherChannel:
+      nick = myBotNameHere:
+      name = MyNameIsMuxBot!:
+      users= Net2-perms.conf:
+      logging=off:
+      active = no
+
+
+# don't remove this end junk or your last entry will vanish
+End of File
