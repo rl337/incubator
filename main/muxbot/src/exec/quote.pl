@@ -6,8 +6,8 @@ my $localStr=shift @ARGV;
 my $result;
 
 $localStr=~s/[\r\n]*$//g;
-my $httpgetbinary = "wget";
-my $httpgetopts = "-q -O -";
+my $httpgetbinary = "curl";
+my $httpgetopts = "-L -s";
 
 
 sub getQuoteResult($) {
