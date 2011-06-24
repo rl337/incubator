@@ -1,6 +1,6 @@
 #!/bin/sh
 
-RESULT=`wget -q -O - "http://www.urbandictionary.com/define.php?term=$1"`
+RESULT=`curl -L -s "http://www.urbandictionary.com/define.php?term=$1"`
 
 echo "$RESULT" | grep -i "<i>$1</i> isn't defined" > /dev/null 2>&1 
 if [ $? -eq 0 ]; then

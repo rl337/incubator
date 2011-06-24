@@ -30,7 +30,7 @@
 
 %LUsers: %default 
 
-%apps:    dict quote time ebay 8ball deals sign weather calc translate
+%apps:    udict dict quote time ebay 8ball deals sign weather calc translate
 %generic: %default %apps
 %users:   %default %apps op perms greet voice links newquote getquote
 %admin:   %users deop connect disconnect users emote link unlink
