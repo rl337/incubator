@@ -1,26 +1,35 @@
 package org.rl337.economy.event;
 
 import org.rl337.economy.SimulationProxy;
-import org.rl337.economy.KeyFactory.Key;
+import org.rl337.economy.KeyFactory.EntityKey;
+import org.rl337.economy.KeyFactory.Tick;
+import org.rl337.economy.data.entity.Entity;
 
 public abstract class AbstractEvent implements Event {
-    private Key mExecuteOnTick;
-    private Key mExecutedTick;
+    private static final long serialVersionUID = -9096035749027033628L;
+    private Tick mExecuteOnTick;
+    private Tick mExecutedTick;
     private boolean mSuccess;
+    private EntityKey mEntityKey;
     
-    public AbstractEvent(Key tickToExecute) {
+    public AbstractEvent(EntityKey key, Tick tickToExecute) {
         mExecuteOnTick = tickToExecute;
         mExecutedTick = null;
         mSuccess = false;
+        mEntityKey = key;
     }
 
     @Override
-    public Key getExecuteOnTick() {
+    public Tick getExecuteOnTick() {
         return mExecuteOnTick;
     }
     
-    public Key getExecutedOnTick() {
+    public Tick getExecutedOnTick() {
         return mExecutedTick;
+    }
+    
+    public EntityKey getEntityKey() {
+        return mEntityKey;
     }
     
     public boolean success() {
@@ -33,18 +42,25 @@ public abstract class AbstractEvent implements Event {
     
     public void execute(SimulationProxy p) throws EventException {
         mExecutedTick = p.getCurrentTick();
+        Entity entity = p.getEntity(mEntityKey);
+        if (entity == null) {
+            mSuccess = false;
+            throw new EventException("Invalid entity key on event.");
+        }
         
         try {
-            protectedExecute(p);
+            protectedExecute(entity, p);
         } catch (EventException e) {
+            mSuccess = false;
             throw e;
         } catch (Exception e) {
+            mSuccess = false;
             throw new EventException(e);
         }
         
         mSuccess = true;
     }
     
-    public abstract void protectedExecute(SimulationProxy p)throws Exception;
+    public abstract void protectedExecute(Entity e, SimulationProxy p)throws Exception;
     
 }

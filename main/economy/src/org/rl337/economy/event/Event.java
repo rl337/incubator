@@ -1,11 +1,13 @@
 package org.rl337.economy.event;
 
+import java.io.Serializable;
+
 import org.rl337.economy.SimulationProxy;
-import org.rl337.economy.KeyFactory.Key;
+import org.rl337.economy.KeyFactory.Tick;
 
-public interface Event {
+public interface Event extends Serializable {
 
-    Key getExecuteOnTick();
+    Tick getExecuteOnTick();
 
     void execute(SimulationProxy proxy) throws EventException;
 

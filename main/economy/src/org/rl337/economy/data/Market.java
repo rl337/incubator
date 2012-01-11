@@ -1,41 +1,106 @@
 package org.rl337.economy.data;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.TreeSet;
 
+import org.rl337.economy.EntityFactory;
 import org.rl337.economy.KeyFactory;
+import org.rl337.economy.SerializationUtil;
+import org.rl337.economy.KeyFactory.EntityKey;
 import org.rl337.economy.KeyFactory.Key;
 import org.rl337.economy.KeyFactory.KeyType;
+import org.rl337.economy.data.entity.Entity;
 import org.rl337.economy.data.entity.MarketUser;
+
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+import com.google.inject.Inject;
 
 public class Market {
     private TreeSet<Bid> mOfferExpirations;
     private TreeSet<Bid> mBuyExpirations;
     
+    @Expose @SerializedName("offers")
     private TreeSet<Bid> mOffers;
+
+    @Expose @SerializedName("buys")
     private TreeSet<Bid> mBuys;
     
+    @Inject
     private KeyFactory mKeyFactory;
+    @Inject
+    private EntityFactory mEntityFactory;
     
-    public Market(KeyFactory keyFactory) {
+    public Market() {
         mOfferExpirations = new TreeSet<Bid>(new CompareByCost());
         mBuyExpirations = new TreeSet<Bid>(new CompareByCost());
-        mKeyFactory = keyFactory;
         
         mOffers = new TreeSet<Bid>(new CompareByExpirationTick());
         mBuys = new TreeSet<Bid>(new CompareByExpirationTick());
     }
     
-    public void offer(MarketUser user, Resource resource, int qty, int cost, long exp) {
-        Bid offer = newBid(user, resource, qty, cost, exp);
+    public boolean save(File f) {
+        MarketSave root = new MarketSave();
+        root.offers = mOffers;
+        root.buys = mBuys;
+        
+        return SerializationUtil.writeJSON(root, f);
+    }
+    
+    public boolean load(File file) {
+        //Type setType = Types.newParameterizedType(TreeSet.class, Bid.class);
+        //Type listType = Types.arrayOf(setType);
+
+        MarketSave root = SerializationUtil.loadJSON(MarketSave.class, file);
+        
+        if(root == null) {
+            return false;
+        }
+        
+        mOffers = root.offers;
+        mBuys = root.buys;
+        
+        for(Bid s : mOffers) {
+            mOfferExpirations.add(s);
+        }
+        
+        for(Bid b : mBuys) {
+            mBuyExpirations.add(b);
+        }
+
+        return true;
+    }
+    
+    public static class MarketSave {
+        @Expose @SerializedName("offers")
+        TreeSet<Bid> offers;
+        @Expose @SerializedName("buys")
+        TreeSet<Bid> buys;
+    }
+
+
+    
+    public void offer(EntityKey entityKey, Resource resource, int qty, int cost, long exp) {
+        Bid offer = newBid(entityKey, resource, qty, cost, exp);
         mOfferExpirations.add(offer);
         mOffers.add(offer);
     }
     
-    public void buy(MarketUser user, Resource resource, int qty, int cost, long exp) {
-        Bid buy = newBid(user, resource, qty, cost, exp);
+    public void buy(EntityKey entityKey, Resource resource, int qty, int cost, long exp) {
+        Bid buy = newBid(entityKey, resource, qty, cost, exp);
         mBuys.add(buy);
         mBuyExpirations.add(buy);
+    }
+    
+    private MarketUser getMarketUserByKey(EntityKey key) {
+        Entity entity = mEntityFactory.get(key);
+        if (entity == null || !(entity instanceof MarketUser)) {
+            return null;
+        }
+        
+        return (MarketUser) entity;
     }
     
     public void executeTick(Key tick) {
@@ -43,13 +108,24 @@ public class Market {
         // First expire any offers or buys that are set to expire before this tick.
         while(!mBuyExpirations.isEmpty() && mBuyExpirations.first().getExpiration() < tickValue) {
             Bid buy = mBuyExpirations.pollFirst();
-            buy.getMarketUser().onBuyExpired(buy);
+            
+            MarketUser user = getMarketUserByKey(buy.getEntityKey());
+            if (user == null) {
+                continue;
+            }
+            
+            user.onBuyExpired(buy);
             mBuys.remove(buy);
         }
 
         while(!mOfferExpirations.isEmpty() && mOfferExpirations.first().getExpiration() < tickValue) {
             Bid offer = mOfferExpirations.pollFirst();
-            offer.getMarketUser().onOfferExpired(offer);
+            MarketUser user = getMarketUserByKey(offer.getEntityKey());
+            if (user == null) {
+                continue;
+            }
+            
+            user.onOfferExpired(offer);
             mOffers.remove(offer);
         }
         
@@ -57,9 +133,9 @@ public class Market {
         satisfyOffers();
     }
     
-    private Bid newBid(MarketUser user, Resource resource, int qty, int cost, long exp) {
+    private Bid newBid(EntityKey entityKey, Resource resource, int qty, int cost, long exp) {
         Key key = mKeyFactory.newKey(KeyType.Bid);
-        return new Bid(key, user, resource, qty, cost, exp);
+        return new Bid(key, entityKey, resource, qty, cost, exp);
     }
 
     
@@ -67,16 +143,28 @@ public class Market {
         Bid[] sells = mOffers.toArray(new Bid[mOffers.size()]);
         
         for(Bid sell : sells) {
+            MarketUser sellerUser = getMarketUserByKey(sell.getEntityKey());
+            if (sellerUser == null) {
+                mOffers.remove(sell);
+                continue;
+            }
+            
             while (!mBuys.isEmpty() && sell.getQuantityLeft() > 0) {
                 // get the lowest offer
                 Bid buy = mBuys.last();
+
+                MarketUser buyerUser = getMarketUserByKey(buy.getEntityKey());
+                if (buyerUser == null) {
+                    mBuys.remove(buy);
+                    continue;
+                }
+                
                 int buyCost = buy.getCost();
                 
                 // if the highest buy is less than our sales price, exit
                 if (buyCost < sell.getCost()) {
                     break;
                 }
-                
                 
                 int buyQty = buy.getQuantityLeft();
                 int inventory = sell.getQuantityLeft();
@@ -85,16 +173,16 @@ public class Market {
                 if (inventory < buyQty) {
                     buy.take(inventory);
                     sell.take(inventory);
-                    sell.getMarketUser().onOfferExecuted(sell, buy, inventory);
-                    buy.getMarketUser().onBuyExecuted(sell, buy, inventory);
+                    sellerUser.onOfferExecuted(sell, buy, inventory);
+                    buyerUser.onBuyExecuted(sell, buy, inventory);
                     break;
                 } 
     
                 // If we get here, we have more or exactly the same as the buy
                 sell.take(buyQty);
                 buy.take(buyQty);
-                sell.getMarketUser().onOfferExecuted(sell, buy, buyQty);
-                buy.getMarketUser().onBuyExecuted(sell, buy, buyQty);
+                sellerUser.onOfferExecuted(sell, buy, buyQty);
+                buyerUser.onBuyExecuted(sell, buy, buyQty);
                 mBuys.remove(buy);
             }
             
@@ -108,12 +196,24 @@ public class Market {
     private void satisfyBuys() {
         Bid[] buys = mBuys.toArray(new Bid[mBuys.size()]);
         for(Bid buy : buys) {
+            MarketUser buyerUser = getMarketUserByKey(buy.getEntityKey());
+            if (buyerUser == null) {
+                mBuys.remove(buy);
+                continue;
+            }
+
             while (!mOffers.isEmpty() && buy.getQuantityLeft() > 0) {
                 // get the lowest offer
                 Bid offer = mOffers.first();
-                int offerCost = offer.getCost();
+                MarketUser sellerUser = getMarketUserByKey(offer.getEntityKey());
+                if (sellerUser == null) {
+                    mOffers.remove(offer);
+                    continue;
+                }
+                
                 
                 // if the lowest offer is more than the bid, we stop.
+                int offerCost = offer.getCost();
                 if (offerCost > buy.getCost()) {
                     break;
                 }
@@ -125,8 +225,8 @@ public class Market {
                 if (needed < offerQty) {
                     offer.take(needed);
                     buy.take(needed);
-                    offer.getMarketUser().onOfferExecuted(offer, buy, needed);
-                    buy.getMarketUser().onBuyExecuted(offer, buy, needed);
+                    sellerUser.onOfferExecuted(offer, buy, needed);
+                    buyerUser.onBuyExecuted(offer, buy, needed);
                     break;
                 } 
     
@@ -134,8 +234,8 @@ public class Market {
                 // more than the offer has.
                 offer.take(offerQty);
                 buy.take(offerQty);
-                offer.getMarketUser().onOfferExecuted(offer, buy, offerQty);
-                buy.getMarketUser().onBuyExecuted(offer, buy, offerQty);
+                sellerUser.onOfferExecuted(offer, buy, offerQty);
+                buyerUser.onBuyExecuted(offer, buy, offerQty);
                 mOffers.remove(offer);
             }
             
@@ -153,18 +253,35 @@ public class Market {
         return mOffers.toArray(new Bid[mOffers.size()]);
     }
 
-    public static class Bid {
+    public static class Bid implements Comparable<Bid> {
+        @Expose @SerializedName("id")
         private Key mId;
-        private MarketUser mMarketUser;
+
+        @Expose @SerializedName("user")
+        private EntityKey mEntityKey;
+
+        @Expose @SerializedName("res")
         private Resource mResource;
+
+        @Expose @SerializedName("qty")
         private int mQuantity;
+
+        @Expose @SerializedName("left")
         private int mQtyLeft;
+
+        @Expose @SerializedName("cost")
         private int mCost;
+
+        @Expose @SerializedName("exp")
         private long mExpiration;
         
-        private Bid(Key key, MarketUser e, Resource r, int q, int c, long expiresOn) {
+        public Bid() {
+            
+        }
+        
+        private Bid(Key key, EntityKey e, Resource r, int q, int c, long expiresOn) {
             mId = key;
-            mMarketUser = e;
+            mEntityKey = e;
             mResource = r;
             mQuantity = q;
             mCost = c;
@@ -176,8 +293,8 @@ public class Market {
             return mId;
         }
         
-        public MarketUser getMarketUser() {
-            return mMarketUser;
+        public EntityKey getEntityKey() {
+            return mEntityKey;
         }
         
         public long getExpiration() {
@@ -207,6 +324,12 @@ public class Market {
         
         public int getCost() {
             return mCost;
+        }
+
+        @Override
+        public int compareTo(Bid other) {
+            Key otherKey = other.getKey();
+            return otherKey.compareTo(getKey());
         }
     }
     

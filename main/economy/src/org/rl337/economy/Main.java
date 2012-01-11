@@ -2,20 +2,27 @@ package org.rl337.economy;
 
 import java.util.List;
 
+import org.rl337.economy.config.CommandLineModule;
 import org.rl337.economy.data.entity.Entity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 public class Main {
     private static final Logger smLogger = LoggerFactory.getLogger(Main.class);
     
     public static void main(String[] args) {
+        Injector injector = Guice.createInjector(new CommandLineModule());
+
         smLogger.info("Starting simulation");
         
         long maxTicks = 100000;
         int entityCount = 1;
         
-        Simulation sim = new Simulation();
+        Simulation sim = injector.getInstance(Simulation.class);
+
         for(int i = 0; i < entityCount; i++) {
             sim.addEntity(Integer.toString(i));
         }
@@ -36,7 +43,7 @@ public class Main {
             buckets[i] = 0;
         }
         
-        List<Entity> entities = sim.getEntities();
+        List<Entity> entities = sim.listEntities();
         for(int i = 0; i < entities.size(); i++) {
             int happiness = entities.get(i).getHappiness();
             int bucket = (happiness * buckets.length) / 1024;
@@ -57,6 +64,4 @@ public class Main {
             System.out.println(result); 
         }
     }
-    
-
 }

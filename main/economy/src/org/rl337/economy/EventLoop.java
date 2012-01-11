@@ -1,22 +1,27 @@
 package org.rl337.economy;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import org.rl337.economy.KeyFactory.Key;
+import org.rl337.economy.KeyFactory.Tick;
+import org.rl337.economy.data.entity.Entity;
 import org.rl337.economy.event.Event;
 import org.rl337.economy.event.Event.EventException;
 
+import com.google.inject.Inject;
+
 public class EventLoop {
     private HashMap<Key, List<Event>> mEventMap;
-    private Key mCurrentTick;
+    
+    @Inject
     private SimulationProxy mSimulationProxy;
 
-    public EventLoop(SimulationProxy simulationProxy) {
+    @Inject
+    public EventLoop() {
         mEventMap = new HashMap<Key, List<Event>>();
-        mCurrentTick = simulationProxy.getCurrentTick();
-        mSimulationProxy = simulationProxy;
     }
 
     public boolean addEvent(Event event) {
@@ -24,8 +29,9 @@ public class EventLoop {
             return false;
         }
         
-        Key executeOnTick = event.getExecuteOnTick();
-        if (mCurrentTick.getValue() >= executeOnTick.getValue()) {
+        Tick executeOnTick = event.getExecuteOnTick();
+        Tick currentTick = mSimulationProxy.getCurrentTick();
+        if (currentTick.getValue() >= executeOnTick.getValue()) {
             return false;
         }
 
@@ -40,11 +46,12 @@ public class EventLoop {
     }
 
     public int executeTick(Key tick) {
-        if (tick == null || tick.getValue() < mCurrentTick.getValue()) {
+        Tick currentTick = mSimulationProxy.getCurrentTick();
+        
+        if (tick == null || tick.getValue() < currentTick.getValue()) {
             return 0;
         }
         
-        mCurrentTick = tick;
         if (!mEventMap.containsKey(tick)) {
             return 0;
         }
@@ -64,12 +71,28 @@ public class EventLoop {
         return eventsExecuted;
     }
 
-    public Key getCurrentTick() {
-        return mCurrentTick;
+    public Tick getCurrentTick() {
+        return mSimulationProxy.getCurrentTick();
     }
 
     public boolean isIdle() {
         return mEventMap.isEmpty();
     }
+
+    public <T extends Entity> boolean load(File file) {
+        HashMap<Key, List<Event>> eventMap = SerializationUtil.loadBinary(file);
+        
+        if (eventMap == null) {
+            return false;
+        }
+        
+        mEventMap = eventMap;
+        return true;
+    }
+    
+    public boolean save(File file) {
+        return SerializationUtil.writeBinary(mEventMap, file);
+    }
+
 
 }

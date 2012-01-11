@@ -1,60 +1,44 @@
 package org.rl337.economy;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.Serializable;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.google.gson.reflect.TypeToken;
 
 public class KeyFactory {
     private static final Logger smLogger = LoggerFactory.getLogger(KeyFactory.class);
     
-    @Expose @SerializedName("counters")
     private HashMap<KeyType, KeyCounter> mCounters;
     
     public KeyFactory() {
         mCounters = new HashMap<KeyType, KeyCounter>();
     }
     
-    public static KeyFactory loadFile(File file) {
-        Gson gson = new Gson();
+    public boolean load(File file) {
         
-        try {
-        FileReader reader = new FileReader(file);
-            KeyFactory result = gson.fromJson(reader, KeyFactory.class);
-            return result;
-        } catch (IOException e) {
-            return null;
-        }
+        Type mapType = new TypeToken<HashMap<KeyType, KeyCounter>>(){}.getType();
         
-    }
-    
-    public static boolean save(File file, KeyFactory factory) {
-        if (file == null) {
+        HashMap<KeyType, KeyCounter> result = SerializationUtil.loadJSON(mapType, file);
+        if (result == null) {
             return false;
         }
-
-        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
-        String sb = gson.toJson(factory);
         
-        try {
-            FileWriter fw = new FileWriter(file);
-            fw.write(sb.toString());
-            fw.close();
-        } catch (IOException e) {
-            smLogger.error("Could not write to file: " + file.getPath());
-            return false;
-        }
+        mCounters = result;
         
         return true;
+    }
+    
+    public boolean save(File file) {
+        return SerializationUtil.writeJSON(mCounters, file);
     }
     
     private KeyCounter getKeyCounter(KeyType kt) {
@@ -73,22 +57,28 @@ public class KeyFactory {
         return counter;
     }
     
-    public Key newKey(KeyType kt) {
+    public <T extends Key> T newKey(KeyType kt) {
         KeyCounter counter = getKeyCounter(kt);
         if (counter == null) {
             return null;
         }
         long value = counter.next();
-        return new Key(kt, value);
+        if ((value / counter.getIncrementBy()) % 10000 == 0) {
+            smLogger.info(kt.getPrefix() + " generated key " + value);
+        }
+
+        return KeyType.getInstance(kt, value);
     }
     
-    public Key currentKey(KeyType kt) {
+    public <T extends Key> T currentKey(KeyType kt) {
         KeyCounter counter = getKeyCounter(kt);
         if (counter == null) {
             return null;
         }
-                
-        return new Key(kt, counter.current());
+        
+        long value = counter.current();
+        
+        return KeyType.getInstance(kt, value);
     }
     
     private static class KeyCounter {
@@ -124,18 +114,24 @@ public class KeyFactory {
         public long current() {
             return mCounter;
         }
+        
+        public long getIncrementBy() {
+            return mIncrement;
+        }
     }
     
-    public static enum KeyType implements Comparable<KeyType> {
-        Unknown("XXX"),
-        Tick("TIC"),
-        Bid("BID"),
-        Entity("ENT");
+    public static enum KeyType implements Comparable<KeyType>, Serializable {
+        Unknown("XXX", UnknownKey.class),
+        Tick("TIC", Tick.class),
+        Bid("BID", BidKey.class),
+        Entity("ENT", EntityKey.class);
         
         private String mPrefix;
+        private Class<? extends Key> mClass;
         
-        private KeyType(String prefix) {
+        private KeyType(String prefix, Class<? extends Key> clazz) {
             mPrefix = prefix;
+            mClass = clazz;
         }
         
         public String getPrefix() {
@@ -145,6 +141,11 @@ public class KeyFactory {
         public boolean equals(KeyType k) {
             return mPrefix.equals(k.getPrefix());
         }
+        
+        public Class<? extends Key> getKeyClass() {
+            return mClass;
+        }
+
         
         public static KeyType parseKeyType(String prefix) {
             if (prefix == null || prefix.length() < 1) {
@@ -160,9 +161,39 @@ public class KeyFactory {
             
             return null;
         }
+        
+        @SuppressWarnings("unchecked")
+        private static <T extends Key> T getInstance(KeyType kt, long value) {
+            Class<T> clazz = (Class<T>) kt.getKeyClass();
+            try {
+                //Constructor<T> c = clazz.getConstructor(new Class<?>[] {long.class});
+                Constructor<T> c = clazz.getConstructor(long.class);
+                if (c == null) {
+                    return null;
+                }
+
+                return c.newInstance(value);
+            } catch (SecurityException e) {
+                smLogger.error("SecurityException instantiating " + kt.mPrefix, e);
+            } catch (NoSuchMethodException e) {
+                smLogger.error("NoSuchMethodException instantiating " + kt.mPrefix + " " + clazz.getName(), e);
+            } catch (IllegalArgumentException e) {
+                smLogger.error("IllegalArgumentException instantiating " + kt.mPrefix, e);
+            } catch (InstantiationException e) {
+                smLogger.error("InstantiationException instantiating " + kt.mPrefix, e);
+            } catch (IllegalAccessException e) {
+                smLogger.error("IllegalAccessException instantiating " + kt.mPrefix, e);
+            } catch (InvocationTargetException e) {
+                smLogger.error("InvocationTargetException instantiating " + kt.mPrefix, e);
+            }
+            
+            return null;
+        }
     }
     
-    public static class Key implements Comparable<Key> {
+    public static class Key implements Comparable<Key>, Serializable {
+        private static final long serialVersionUID = -5319267928901862651L;
+
         @Expose @SerializedName("v")
         private long mValue;
         @Expose @SerializedName("k")
@@ -216,7 +247,59 @@ public class KeyFactory {
         }
         
         public String toString() {
-            return mKeyType.getPrefix() + Long.toString(mValue);
+            return mKeyType.getPrefix() + "-" + Long.toString(mValue);
+        }
+    }
+    
+    public static class Tick extends Key {
+        private static final long serialVersionUID = 5792627088312990238L;
+
+        public Tick(){
+            this(-1);
+        }
+
+        public Tick(long tick) {
+            super(KeyType.Tick, tick);
+        }
+
+        public Tick getFutureTick(int i) {
+            return new Tick(getValue() + i);
+        }
+    }
+    
+    public static class BidKey extends Key {
+        private static final long serialVersionUID = 4714185849595210086L;
+
+        public BidKey(){
+            this(-1);
+        }
+
+        public BidKey(long bidId) {
+            super(KeyType.Bid, bidId);
+        }
+    }
+    
+    public static class EntityKey extends Key {
+        private static final long serialVersionUID = 312731308657126915L;
+
+        public EntityKey(){
+            this(-1);
+        }
+        
+        public EntityKey(long entityId) {
+            super(KeyType.Entity, entityId);
+        }
+    }
+    
+    public static class UnknownKey extends Key {
+        private static final long serialVersionUID = -5202682028307959725L;
+
+        public UnknownKey(){
+            this(-1);
+        }
+
+        public UnknownKey(long id) {
+            super(KeyType.Unknown, id);
         }
     }
 }

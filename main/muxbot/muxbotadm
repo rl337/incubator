@@ -1,0 +1,105 @@
+#!/bin/sh
+
+# path to the muxbot
+
+# you must set the botpath to an absolute path to
+# the top level directory of the bot. also note that
+# the bot uses the environment variables here to 
+# figure out where its required files are... so 
+# it would be unwise to shortcircuit the defines here.
+
+BOTPATH=$HOME/muxbot
+
+# stuff you shouldn't have to change
+SRCPATH=$BOTPATH/src
+RUNPATH=$BOTPATH/run
+CNFPATH=$BOTPATH/conf
+LOGPATH=$BOTPATH/log
+LIBPATH=$BOTPATH/lib
+
+BOTEXE=daemon.pl
+
+# don't prefix these files with a path. they automatically
+# are looked up in their respective *PATH variables above.
+CONFFILE=muxbot.conf
+LOGFILE=muxbot.log
+PIDFILE=muxbot.pid
+
+if [ "$BOTPATH" = "UNSET" ]; then
+   echo "You must customise the start script for it to work."
+   exit 1;
+fi
+
+export BOTPATH RUNPATH CNFPATH SRCPATH LOGPATH LIBPATH
+
+FULLPIDPATH="$RUNPATH/$PIDFILE"
+FULLBOTEXE="$SRCPATH/$BOTEXE"
+
+case "$1" in 
+   start)
+      if [ -f $FULLPIDPATH ]; then
+         OLDPID=`cat $FULLPIDPATH`;
+         NEWPID=`ps -aef | grep -v grep | grep $BOTEXE | sed 's/^[ ]*//g' | cut -f 1 -d\  `;
+         for THISPID in $NEWPID; do
+            if [ "$THISPID" = "$OLDPID" ]; then
+               echo "muxbot already running as pid $OLDPID";
+               exit 1;
+            fi
+         done
+         echo "stale pidfile found, removing."
+         rm -f $FULLPIDPATH;
+      fi
+      if $FULLBOTEXE -p $PIDFILE -l $LOGFILE -f $CONFFILE; then 
+         echo "$0 $1: muxbot started";
+      else 
+         echo "$0 $1: muxbot could not be started";
+      fi
+      ;;
+   kill)
+      if [ -f $FULLPIDPATH ]; then
+         echo "terminating muxbot with extreme prejudice."
+         kill -9 `cat $FULLPIDPATH`;
+	 rm -f $FULLPIDPATH
+      else 
+         echo "muxbot is not running, no pidfile detected."
+      fi
+      ;;
+   stop)
+      if [ -f $FULLPIDPATH ]; then
+         echo "sending muxbot a KILL signal."
+         kill `cat $FULLPIDPATH`;
+      else 
+         echo "muxbot is not running, no pidfile detected."
+      fi
+      ;;
+   restart)
+      ;;
+   reload)
+      if [ -f $FULLPIDPATH ]; then
+         echo "sending muxbot a HUP signal."
+         kill -HUP `cat $FULLPIDPATH`;
+      else 
+         echo "muxbot is not running, no pidfile detected."
+      fi
+      ;;
+   status)
+      if [ -f $FULLPIDPATH ]; then
+         OLDPID=`cat $FULLPIDPATH`;
+         NEWPID=`ps x | grep -v grep | grep $BOTEXE | sed 's/^[ ]*//g' | cut -f 1 -d\  `;
+         for THISPID in $NEWPID; do
+            if [ "$THISPID" = "$OLDPID" ]; then
+               echo "muxbot running as pid $OLDPID";
+               exit 1;
+            fi
+         done
+         echo "muxbot is not running; stale pidfile found."
+      else
+         echo "muxbot is not running; no pidfile found."
+      fi
+      ;;
+   *)
+      echo "Usage: muxbotadm <start|stop|restart|reload|status>"
+      exit 1;
+esac
+
+exit 0;
