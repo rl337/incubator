@@ -194,27 +194,8 @@ sub calcExponent {
    my $rside = shift;
    my $result = $lside;
    my $negative = 0;
-   if( $rside < 0 ) {
-      $negative = 1;
-      $rside  = -1 * $rside;
-   }
 
-   if( $rside < 1 ) {
-      return 1;
-   }
-
-   my $count = 1;
-   while( $count++ < $rside ) {
-      $result = $result * $lside;
-   }
-   if( $negative ) {
-      if( $result != 0 ) {
-         return 1/$result;
-      }
-      return 0;
-   } else {
-      return $result;
-   }
+   return $lside ** $rside;
 }
 
 
