@@ -1,6 +1,7 @@
 #!/bin/sh
 
-RESULT=`curl -L -s "http://www.urbandictionary.com/define.php?term=$1"`
+ESCAPED=`echo "$1" | sed -e 's/ /+/g'`
+RESULT=`curl -L -s "http://www.urbandictionary.com/define.php?term=$ESCAPED"`
 
 echo "$RESULT" | grep -i "<i>$1</i> isn't defined" > /dev/null 2>&1 
 if [ $? -eq 0 ]; then
