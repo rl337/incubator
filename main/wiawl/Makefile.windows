@@ -1,0 +1,78 @@
+SDLDIR=SDL-1.2.15
+SDLIMAGEDIR=SDL_image-1.2.12-mingw
+
+CC = g++
+CCFLAGS = -c -I$(SDLDIR)/include -I$(SDLIMAGEDIR)/include -Dmain=SDL_main -D_GNU_SOURCE=1
+OUTOPT = -o 
+
+SRCDIR = src
+CONFDIR = conf
+BUILDDIR = build
+ARCH=x86
+LINKFLAGS = -L$(SDLDIR)/lib -L$(SDLIMAGEDIR)/lib/$(ARCH) -lmingw32 -lSDLmain -lSDL -lSDL_image -mwindows
+
+#LINKFLAGS = /SUBSYSTEM:WINDOWS
+#LINKFLAGS = /link /SUBSYSTEM:CONSOLE /NODEFAULTLIB:msvcrt.lib
+RESOURCEDIR = Resources
+
+EXENAME = wiawl
+EXETARGET = $(EXENAME).exe
+BUNDLEDIR = $(BUILDDIR)\$(EXENAME).app
+ZIPDIR = $(BUILDDIR)\$(EXENAME)-dist
+
+PLATFORMTARGETS = 
+
+SDL_FRAMEWORKDIR=/Library/Frameworks/SDL.framework
+SDLIMAGE_FRAMEWORKDIR=/Library/Frameworks/SDL_Image.framework
+
+default : 
+	echo "valid targets are: osx win clean"
+
+osx : $(BUNDLEDIR)
+
+win : $(ZIPDIR)
+
+$(BUILDDIR)/$(EXENAME) : $(BUILDDIR) $(BUILDDIR)/SDLAppMain.o $(BUILDDIR)/Level.o $(BUILDDIR)/main.o $(PLATFORMTARGETS)
+	$(CC) $(OUTOPT) $(BUILDDIR)/$(EXETARGET) $(BUILDDIR)/main.o $(BUILDDIR)/Level.o $(BUILDDIR)/SDLAppMain.o $(PLATFORMTARGETS) $(LINKFLAGS)
+
+$(BUILDDIR) :
+	mkdir $(BUILDDIR)
+
+$(BUILDDIR)/main.o : $(SRCDIR)/main.cpp
+	$(CC) $(OUTOPT)$(BUILDDIR)/main.o $(CCFLAGS) $(SRCDIR)/main.cpp
+
+$(BUILDDIR)/SDLMain.o : $(SRCDIR)/osx/SDLMain.m $(SRCDIR)/osx/SDLMain.h
+	$(CC) $(OUTOPT)$(BUILDDIR)/SDLMain.o $(CCFLAGS) $(SRCDIR)/osx/SDLMain.m
+
+$(BUILDDIR)/Level.o : $(SRCDIR)/Level.h $(SRCDIR)/Level.cpp
+	$(CC) $(OUTOPT)$(BUILDDIR)/Level.o $(CCFLAGS) $(SRCDIR)/Level.cpp
+
+$(BUILDDIR)/SDLAppMain.o : $(SRCDIR)/SDLAppMain.h $(SRCDIR)/SDLAppMain.cpp $(BUILDDIR)/Level.o
+	$(CC) $(OUTOPT)$(BUILDDIR)/SDLAppMain.o $(CCFLAGS) $(SRCDIR)/SDLAppMain.cpp
+
+clean : 
+	rd /S /Q $(BUILDDIR)
+
+$(BUNDLEDIR) : $(BUILDDIR)/$(EXENAME)
+	mkdir -p $(BUNDLEDIR)
+	mkdir -p $(BUNDLEDIR)/Contents
+	mkdir -p $(BUNDLEDIR)/Contents/MacOS
+	mkdir -p $(BUNDLEDIR)/Contents/Resources
+	mkdir -p $(BUNDLEDIR)/Contents/Frameworks
+	cp $(CONFDIR)/Info.plist $(BUNDLEDIR)/Contents
+	cp $(BUILDDIR)/$(EXENAME) $(BUNDLEDIR)/Contents/MacOS
+	mkdir -p $(BUNDLEDIR)/Contents/Frameworks
+	cp -a $(RESOURCEDIR) $(BUNDLEDIR)/Contents
+	mkdir -p $(BUNDLEDIR)/Contents/Frameworks/SDL.framework/Versions/$(SDL_FRAMEWORK_VERSION)
+	mkdir -p $(BUNDLEDIR)/Contents/Frameworks/SDL_Image.framework/Versions/$(SDLIMAGE_FRAMEWORK_VERSION)
+	cp -a $(SDL_FRAMEWORKDIR) $(BUNDLEDIR)/Contents/Frameworks
+	cp -a $(SDLIMAGE_FRAMEWORKDIR) $(BUNDLEDIR)/Contents/Frameworks
+
+$(ZIPDIR) : $(BUILDDIR)/$(EXENAME)
+	mkdir $(ZIPDIR)
+	mkdir $(ZIPDIR)\Contents
+	mkdir $(ZIPDIR)\Contents\Resources
+	xcopy /E $(RESOURCEDIR) $(ZIPDIR)\Contents\Resources
+	copy $(SDLDIR)\bin\SDL.dll $(ZIPDIR)
+	copy $(SDLIMAGEDIR)\lib\$(ARCH)\*.dll $(ZIPDIR)
+	copy $(BUILDDIR)\$(EXETARGET) $(ZIPDIR)
