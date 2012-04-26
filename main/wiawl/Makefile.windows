@@ -1,5 +1,6 @@
 SDLDIR=SDL-1.2.15
 SDLIMAGEDIR=SDL_image-1.2.12-mingw
+MINGWDIR=\mingw32-beta-20120416-1
 
 CC = g++
 CCFLAGS = -c -I$(SDLDIR)/include -I$(SDLIMAGEDIR)/include -Dmain=SDL_main -D_GNU_SOURCE=1
@@ -76,3 +77,5 @@ $(ZIPDIR) : $(BUILDDIR)/$(EXENAME)
 	copy $(SDLDIR)\bin\SDL.dll $(ZIPDIR)
 	copy $(SDLIMAGEDIR)\lib\$(ARCH)\*.dll $(ZIPDIR)
 	copy $(BUILDDIR)\$(EXETARGET) $(ZIPDIR)
+	copy $(MINGWDIR)\bin\libgcc_s_dw2-1.dll $(ZIPDIR)
+	copy "$(MINGWDIR)\bin\libstdc++-6.dll" $(ZIPDIR)
