@@ -177,6 +177,29 @@ public class MatrixTest extends TestCase {
         assertMatrix(a.multiplyElementWise(b), resultvals);
     }
     
+    public void testRandom() {
+        // The random functions seeded with the same value should give
+        // the same sequence of numbers.
+        Random randA = new Random(1024L);
+        Random randB = new Random(1024L);
+        
+        int width = 5;
+        int height = 5;
+        int min = 3;
+        int max = 13;
+
+        // this should give us the same values as randB scaled up by 10 and shifted by 3
+        Matrix a = Matrix.random(width, height, min, max, randA);
+        for(int i = 0; i < 5; i++) {
+            for(int j = 0; j < 5; j++) {
+                assertEquals("row:" + i + " col:" + j,
+                    randB.nextDouble() * (max - min) + min,
+                    a.getValue(i, j)
+                );
+            }
+        }
+    }
+    
     public void testSum() {
         double[][] avals = new double[][] {
             {1, 2},

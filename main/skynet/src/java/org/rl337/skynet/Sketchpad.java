@@ -20,9 +20,16 @@ public class Sketchpad {
     private int mHeight;
     private int mColorIndex;
     
+    private double mMinX;
+    private double mMaxX;
+    private double mMinY;
+    private double mMaxY;
+    
+    private boolean mAutoRange;
+    
     private static final Color[] smColors = new Color[] {Color.RED, Color.BLUE, Color.YELLOW, Color.MAGENTA, Color.GREEN, Color.ORANGE, Color.CYAN, Color.LIGHT_GRAY};
     
-    public Sketchpad(String title, int width, int height) {
+    public Sketchpad(String title, int width, int height, double minX, double maxX, double minY, double maxY) {
         mFrame = new JFrame(title);
         mFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
@@ -34,10 +41,19 @@ public class Sketchpad {
         mFrame.pack();
         mFrame.setVisible(true);
         mColorIndex = 0;
+        
+        mMinX = minX;
+        mMaxX = maxX;
+        mMinY = minY;
+        mMaxY = maxY;
+        
+        mAutoRange = false;
     }
-
-
     
+    public Sketchpad(String title, int width, int height) {
+        this(title, width, height, 0.0, (double) width, 0.0, (double) height);
+        mAutoRange = true;
+    }
     
     private Color nextColor() {
         Color result = smColors[mColorIndex];
@@ -46,11 +62,39 @@ public class Sketchpad {
         return result;
     }
     
-    public void plotScatterChart(Matrix x, Matrix y) {
-        plotScatterChart(x, y, null);
+    private void autoSetRanges(Matrix x, Matrix y) {
+        
+        mMinX = x.getValue(0, 0);
+        mMaxX = mMinX;
+        for(int j = 0; j < x.getColumns(); j++) {
+            for(int i = 0; i < x.getRows(); i++) {
+                double v = x.getValue(i, j);
+                if (mMinX > v) {
+                    mMinX = v;
+                }
+                
+                if (mMaxX < v) {
+                    mMaxX = v;
+                }
+            }
+        }
+        
+        mMinY = y.getValue(0, 0);
+        mMaxY = mMinY;
+        for(int i = 1; i < y.getRows(); i++) {
+            double v = y.getValue(i, 0);
+            if (mMinY > v) {
+                mMinY = v;
+            }
+            
+            if (mMaxY < v) {
+                mMaxY = v;
+            }
+        }
+        
     }
     
-    public void plotScatterChart(Matrix x, Matrix y, Matrix z) {
+    public void plotScatterChart(Matrix x, Matrix y) {
         if (y.getColumns() > 1) {
             throw new IllegalArgumentException("the range of a plot must be only a single column wide");
         }
@@ -59,84 +103,31 @@ public class Sketchpad {
             throw new IllegalArgumentException("Both x and y values should have the same rows");
         }
         
-        if (z != null && (z.getColumns() > 1 || z.getRows() != x.getRows())) {
-            throw new IllegalArgumentException("z matrix must be " + x.getRows() + "x1");
+        if (mAutoRange) {
+            autoSetRanges(x, y);
         }
         
         int padding = 10;
         
-        double miny = y.getValue(0, 0);
-        double maxy = miny;
-        for(int i = 1; i < y.getRows(); i++) {
-            double v = y.getValue(i, 0);
-            if (miny > v) {
-                miny = v;
-            }
-            
-            if (maxy < v) {
-                maxy = v;
-            }
-        }
-        double yrange = maxy - miny;
-        
-        
-        double minz = 0.0;
-        double maxz = 0.0;
-        double zrange = 0.0;
-
-        if (z != null) {
-            minz = z.getValue(0, 0);
-            maxz = minz;
-            for(int i = 1; i < z.getRows(); i++) {
-                double v = z.getValue(i, 0);
-                if (minz > v) {
-                    minz = v;
-                }
-                
-                if (maxz < v) {
-                    maxz = v;
-                }
-            }
-            zrange = maxz - minz;
-        }
+        double yrange = mMaxY - mMinY;
+        double xrange = mMaxX - mMinX;
         
         for(int j = 0; j < x.getColumns(); j++) {
-            double minx = x.getValue(0, j);
-            double maxx = miny;
-            for(int i = 1; i < x.getRows(); i++) {
-                double v = x.getValue(i, j);
-                if (minx > v) {
-                    minx = v;
-                }
-                
-                if (maxx < v) {
-                    maxx = v;
-                }
-            }
-            double xrange = maxx - minx;
-            
             Graphics2D g = mPanel.getGraphics();
-            if (z == null) {
-                g.setColor(nextColor());
-            }
+            g.setColor(nextColor());
             for(int i = 0; i < x.getRows(); i++) {
                 double xi = x.getValue(i, j);
                 double yi = y.getValue(i, 0);
                 
-                if (z != null) {
-                    double zi = z.getValue(i, 0);
-                    int color = (int) ((zi - minz) / zrange) * (smColors.length - 1);
-                    g.setColor(smColors[color]);
-                }
-                
-                int xcoord = padding + (int) ((xi - minx) / xrange * (mWidth - 2*padding));
-                int ycoord = padding + (mHeight - 2*padding) - (int) ((yi - miny) / yrange * (mHeight - 2*padding));
+                int xcoord = padding + (int) ((xi - mMinX) / xrange * (mWidth - 2*padding));
+                int ycoord = padding + (mHeight - 2*padding) - (int) ((yi - mMinY) / yrange * (mHeight - 2*padding));
                 
                 g.drawOval(xcoord, ycoord, 5, 5);
             }
         }
-        
-        mPanel.invalidate();
+        mPanel.refresh();
+        mFrame.repaint();
+        mFrame.invalidate();
     }
 
     private static class DrawPanel extends JPanel {
@@ -158,6 +149,11 @@ public class Sketchpad {
         
         public Graphics2D getGraphics() {
             return (Graphics2D) mImage.getGraphics();
+        }
+        
+        public void refresh() {
+            mImage.flush();
+            invalidate();
         }
     }
 }

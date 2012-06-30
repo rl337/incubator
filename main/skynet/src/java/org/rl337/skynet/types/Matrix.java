@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class Matrix {
     private int mColumns;
@@ -290,6 +291,26 @@ public class Matrix {
         return matrix(rows, cols, 1.0);
     }
     
+    public static Matrix random(int rows, int cols, final double min, double max, final Random random) {
+         Matrix m = zeros(rows, cols);
+         
+         final double range = max - min;
+         return matrixOperation(m, new MatrixOperation() {
+            @Override
+            public double operation(double val) {
+                return random.nextDouble() * range + min;
+            }
+         });
+    }
+    
+    public static Matrix random(int rows, int cols, final double min, double max) {
+        return random(rows, cols, min, max, new Random());
+    }
+    
+    public static Matrix random(int rows, int cols) {
+        return random(rows, cols, 0.0, 1.0);
+    }
+    
     public static Matrix matrix(double[][] values) {
         int rows = values.length;
         int cols = values[0].length;
@@ -364,8 +385,8 @@ public class Matrix {
         
         Matrix r = zeros(rows, columns);
         
-        for(int i = 0; i < columns; i++) {
-            for(int j = 0; j < rows; j++) {
+        for(int j = 0; j < rows; j++) {
+            for(int i = 0; i < columns; i++) {
                 r.setValue(j, i, op.operation(a.getValue(j, i), b.getValue(j, i)));
             }
         }
@@ -379,8 +400,8 @@ public class Matrix {
         
         Matrix r = zeros(rows, columns);
         
-        for(int i = 0; i < columns; i++) {
-            for(int j = 0; j < rows; j++) {
+        for(int j = 0; j < rows; j++) {
+            for(int i = 0; i < columns; i++) {
                 r.setValue(j, i, op.operation(a.getValue(j, i)));
             }
         }
