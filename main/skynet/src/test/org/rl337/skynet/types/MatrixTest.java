@@ -101,10 +101,10 @@ public class MatrixTest extends TestCase {
     
     public void testIdentityMultiply() {
         Matrix id = Matrix.identity(5);
-        double[] allones = new double[] {1.0, 1.0, 1.0, 1.0, 1.0};
-        Matrix vector = Matrix.vector(allones);
+        double[][] allones = new double[][] {{1.0, 1.0, 1.0, 1.0, 1.0}};
+        Matrix vector = Matrix.matrix(allones);
         
-        Matrix result = vector.transpose().multiply(id);
+        Matrix result = vector.multiply(id);
         assertEquals("anything times a identity should be itself", vector, result);
     }
 
@@ -215,6 +215,51 @@ public class MatrixTest extends TestCase {
         Matrix m = Matrix.matrix(avals);
         
         assertMatrix(m.sliceColumn(1), resultvals);
+    }
+    
+    public void testSliceRow() {
+        double[][] avals = new double[][] {
+            {1, 2},
+            {3, 4},
+        };
+        double[][] resultvals = new double[][] {
+            {3, 4},
+        };
+        
+        Matrix m = Matrix.matrix(avals);
+        
+        assertMatrix(m.sliceRow(1), resultvals);
+    }
+    
+    public void testSliceRows() {
+        double[][] avals = new double[][] {
+            {1, 2},
+            {3, 4},
+            {5, 6},
+        };
+        double[][] resultvals = new double[][] {
+            {3, 4},
+            {5, 6}
+        };
+        
+        Matrix m = Matrix.matrix(avals);
+        
+        assertMatrix(m.sliceRows(1,2), resultvals);
+    }
+    
+    public void testSliceColumns() {
+        double[][] avals = new double[][] {
+            {1, 2, 8},
+            {3, 4, 9},
+        };
+        double[][] resultvals = new double[][] {
+            {2, 8},
+            {4, 9}
+        };
+        
+        Matrix m = Matrix.matrix(avals);
+        
+        assertMatrix(m.sliceColumns(1,2), resultvals);
     }
     
     public void testAppendColumns() {

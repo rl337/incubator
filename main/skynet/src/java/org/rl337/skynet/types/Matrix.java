@@ -56,15 +56,22 @@ public class Matrix {
     }
     
     public Matrix multiply(Matrix m) {
-        Matrix newM = zeros(m.getColumns(), getRows());
         if (mColumns != m.mRows) {
             throw new IllegalArgumentException("Tried to multiply " + toDimensionString() + " by " + m.toDimensionString());
         }
         
+        Matrix newM = zeros(getRows(), m.getColumns());
         for(int i = 0; i < mRows; i++) {
             for(int j = 0; j < m.getColumns(); j++) {
-                double value = 0;
+                double value = 0.0;
                 for(int k = 0; k < mColumns; k++){
+                    double a = getValue(i, k);
+                    double b = m.getValue(k, j);
+                    // Java thinks that -Inf * 0 is NaN, so if either are 0, add 0.
+                    if (a == 0 || b == 0.0) {
+                        continue;
+                    }
+                    
                     value += getValue(i,k) * m.getValue(k,j);
                 }
                 newM.setValue(i,j,value);
@@ -74,33 +81,32 @@ public class Matrix {
         return newM;
     }
     
-    public Matrix multiply(double s) {
-        
-        Matrix r = zeros(mRows, mColumns);
-        for(int i = 0; i < mColumns; i++) {
-            for(int j = 0; j < mRows; j++) {
-                r.setValue(j, i, getValue(j, i) * s);
+    public Matrix multiply(final double s) {
+        return matrixOperation(this, new MatrixOperation() {
+            public double operation(double val) {
+                if (s == 0.0) {
+                    return 0.0;
+                }
+                
+                return val * s;
             }
-        }
-        
-        return r;
+        });
     }
     
-    public Matrix divide(double s) {
-        
-        Matrix r = zeros(mRows, mColumns);
-        for(int i = 0; i < mColumns; i++) {
-            for(int j = 0; j < mRows; j++) {
-                r.setValue(j, i, getValue(j, i) / s);
+    public Matrix divide(final double s) {
+        return matrixOperation(this, new MatrixOperation() {
+            public double operation(double val) {
+                if (val == 0.0) {
+                    return 0.0;
+                }
+                return val / s;
             }
-        }
-        
-        return r;
+        });
     }
     
     public Matrix add(Matrix m) {
         return elementWiseOperation("add", this, m,
-            new MatrixOperation() {
+            new MatrixElementWiseOperation() {
                 public double operation(double aVal, double bVal) {
                     return aVal + bVal;
                 }
@@ -110,7 +116,7 @@ public class Matrix {
     
     public Matrix subtract(Matrix m) {
         return elementWiseOperation("subtract", this, m,
-            new MatrixOperation() {
+            new MatrixElementWiseOperation() {
                 public double operation(double aVal, double bVal) {
                     return aVal - bVal;
                 }
@@ -119,9 +125,12 @@ public class Matrix {
     }
     
     public Matrix multiplyElementWise(Matrix m) {
-        return elementWiseOperation("multiply", this, m,
-            new MatrixOperation() {
+        return elementWiseOperation("multiplyElementWise", this, m,
+            new MatrixElementWiseOperation() {
                 public double operation(double aVal, double bVal) {
+                    if (aVal == 0.0 || bVal == 0.0) {
+                        return 0.0;
+                    }
                     return aVal * bVal;
                 }
             }
@@ -130,9 +139,10 @@ public class Matrix {
     
     public double sum() {
         double r = 0.0;
+        
         for(int i = 0; i < mColumns; i++) {
             for(int j = 0; j < mRows; j++) {
-                r += getValue(j, i);
+                r += getValue(j,  i);
             }
         }
         
@@ -203,9 +213,17 @@ public class Matrix {
     public Matrix sliceRow(int row) {
         Matrix result = zeros(1, mColumns);
         
-        for(int i = 0; i < mColumns; i++) {
-            result.setValue(0, i, getValue(row, i));
-        }
+        copyRegion(this, 0, row, result, 0, 0, mColumns, 1);
+        
+        return result;
+    }
+    
+    
+    public Matrix sliceRows(int startRow, int stopRow) {
+        int rows = stopRow - startRow + 1;
+        Matrix result = zeros(rows, mColumns);
+        
+        copyRegion(this, 0, startRow, result, 0, 0, mColumns, rows);
         
         return result;
     }
@@ -213,9 +231,16 @@ public class Matrix {
     public Matrix sliceColumn(int col) {
         Matrix result = zeros(mRows, 1);
         
-        for(int i = 0; i < mRows; i++) {
-            result.setValue(i, 0, getValue(i, col));
-        }
+        copyRegion(this, col, 0, result, 0, 0, 1, mRows);
+        
+        return result;
+    }
+    
+    public Matrix sliceColumns(int startColumn, int stopColumn) {
+        int columns = stopColumn - startColumn + 1;
+        Matrix result = zeros(mRows, columns);
+        
+        copyRegion(this, startColumn, 0, result, 0, 0, columns, mRows);
         
         return result;
     }
@@ -240,6 +265,10 @@ public class Matrix {
         return result;
     }
     
+    public double mean() {
+        return sum() / (mRows * mColumns);
+    }
+    
     public static Matrix zeros(int rows, int columns) {
         return new Matrix(columns, rows);
     }
@@ -255,6 +284,10 @@ public class Matrix {
         }
         
         return m;
+    }
+    
+    public static Matrix ones(int rows, int cols) {
+        return matrix(rows, cols, 1.0);
     }
     
     public static Matrix matrix(double[][] values) {
@@ -293,18 +326,6 @@ public class Matrix {
         return m;
     }
     
-    public double mean() {
-        
-        double total = 0;
-        for (int i = 0; i < mColumns; i++) {
-            for (int j = 0; j < mRows; j++) {
-                total += getValue(j, i);
-            }
-        }
-        
-        return total / (mRows * mColumns);
-    }
-    
     public static Matrix loadFile(File f) throws IOException {
         FileReader fr = new FileReader(f);
         BufferedReader br = new BufferedReader(fr);
@@ -335,7 +356,7 @@ public class Matrix {
         }
     }
     
-    private static Matrix elementWiseOperation(String operationName, Matrix a, Matrix b, MatrixOperation op) {
+    public static Matrix elementWiseOperation(String operationName, Matrix a, Matrix b, MatrixElementWiseOperation op) {
         a.assertDimensions(operationName, true, true, b);
         
         int rows = a.getRows();
@@ -352,8 +373,28 @@ public class Matrix {
         return r;
     }
     
-    private static interface MatrixOperation {
+    public static Matrix matrixOperation(Matrix a, MatrixOperation op) {
+        int rows = a.getRows();
+        int columns = a.getColumns();
+        
+        Matrix r = zeros(rows, columns);
+        
+        for(int i = 0; i < columns; i++) {
+            for(int j = 0; j < rows; j++) {
+                r.setValue(j, i, op.operation(a.getValue(j, i)));
+            }
+        }
+        
+        return r;
+    }
+    
+    public static interface MatrixElementWiseOperation {
         double operation(double aVal, double bVal);
     }
+    
+    public static interface MatrixOperation {
+        double operation(double val);
+    }
+
 
 }

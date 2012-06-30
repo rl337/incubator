@@ -6,7 +6,8 @@ import org.rl337.skynet.types.Matrix;
 public class LinearRegressionHypothesis implements Hypothesis{
 
     public Matrix guess(Matrix theta, Matrix x) {
-        return theta.transpose().multiply(x.transpose());
+        // (theta' * x')' is the same as x * theta
+        return x.multiply(theta);
     }
 
 }
