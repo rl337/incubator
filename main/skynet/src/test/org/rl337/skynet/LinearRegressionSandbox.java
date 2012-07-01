@@ -7,8 +7,10 @@ public class LinearRegressionSandbox {
     public static void main(String[] args) {
         Matrix x = Matrix.random(1000, 1, 0.0, 1.0);
         Matrix y = Matrix.random(1000, 1, 0.75, 1.0);
-        Sketchpad pad = new Sketchpad("test plot", 640, 640, 0.0, 1.0, 0.0, 1.0);
-        pad.plotScatterChart(x, y);
+        
+        String scatterPlotName = "Scatter X vs Y";
+        Sketchpad pad = new Sketchpad("test plot", scatterPlotName, 640, 640, 0.0, 1.0, 0.0, 1.0);
+        pad.plotScatterChart(scatterPlotName, x, y);
         
         Matrix x1 = Matrix.ones(x.getRows(), 1).appendColumns(x);
         Matrix theta = Optimizer.GradientDescent.run(
@@ -23,6 +25,6 @@ public class LinearRegressionSandbox {
         
         System.out.println("Completed learning: " + theta);
         Matrix hx = Hypothesis.LinearRegression.guess(theta, x1);
-        pad.plotScatterChart(x, hx);
+        pad.plotScatterChart(scatterPlotName, x, hx);
     }
 }
