@@ -12,7 +12,7 @@ public class Sigmoid {
     }
     
     private static class SigmoidFunction implements Matrix.MatrixOperation {
-        public double operation(double x) {
+        public double operation(int row, int col, double x) {
             return 1 / (1 + Math.pow(Math.E, -x));
         }
     }

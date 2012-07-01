@@ -13,7 +13,7 @@ public class Log {
         }
         
         private static class LogFunction implements Matrix.MatrixOperation {
-            public double operation(double x) {
+            public double operation(int row, int col, double x) {
                 return Math.log(x);
             }
         }

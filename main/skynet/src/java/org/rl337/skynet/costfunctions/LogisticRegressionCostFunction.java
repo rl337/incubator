@@ -20,4 +20,11 @@ public class LogisticRegressionCostFunction implements CostFunction {
         return whole.divide(m).sumRows().multiply(-1);
     }
 
+    public Matrix gradient(Hypothesis h, Matrix theta, Matrix x, Matrix y) {
+        Matrix hx = h.guess(theta, x);
+        Matrix deltas = hx.subtract(y);
+        Matrix gradient = deltas.transpose().multiply(x).transpose();
+        return gradient;
+    }
+
 }

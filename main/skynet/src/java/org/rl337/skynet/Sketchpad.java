@@ -94,7 +94,7 @@ public class Sketchpad {
         
     }
     
-    public void plotScatterChart(Matrix x, Matrix y) {
+    public void plotScatterChart(Matrix x, Matrix y, ConditionalPlot condition) {
         if (y.getColumns() > 1) {
             throw new IllegalArgumentException("the range of a plot must be only a single column wide");
         }
@@ -105,6 +105,8 @@ public class Sketchpad {
         
         if (mAutoRange) {
             autoSetRanges(x, y);
+            // The firt plot determines the ranges.
+            mAutoRange = false;
         }
         
         int padding = 10;
@@ -119,6 +121,10 @@ public class Sketchpad {
                 double xi = x.getValue(i, j);
                 double yi = y.getValue(i, 0);
                 
+                if (!condition.valid(i, j, xi, yi)) {
+                    continue;
+                }
+                
                 int xcoord = padding + (int) ((xi - mMinX) / xrange * (mWidth - 2*padding));
                 int ycoord = padding + (mHeight - 2*padding) - (int) ((yi - mMinY) / yrange * (mHeight - 2*padding));
                 
@@ -128,6 +134,10 @@ public class Sketchpad {
         mPanel.refresh();
         mFrame.repaint();
         mFrame.invalidate();
+    }
+    
+    public void plotScatterChart(Matrix x, Matrix y) {
+        plotScatterChart(x, y, PLOT_ALWAYS);
     }
 
     private static class DrawPanel extends JPanel {
@@ -156,4 +166,14 @@ public class Sketchpad {
             invalidate();
         }
     }
+    
+    public interface ConditionalPlot {
+        boolean valid(int row, int col, double x, double y);
+    }
+    
+    public static final ConditionalPlot PLOT_ALWAYS = new ConditionalPlot() {
+        public boolean valid(int row, int col, double x, double y) {
+            return true;
+        }
+    };
 }

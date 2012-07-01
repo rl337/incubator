@@ -84,7 +84,7 @@ public class Matrix {
     
     public Matrix multiply(final double s) {
         return matrixOperation(this, new MatrixOperation() {
-            public double operation(double val) {
+            public double operation(int row, int col, double val) {
                 if (s == 0.0) {
                     return 0.0;
                 }
@@ -96,7 +96,7 @@ public class Matrix {
     
     public Matrix divide(final double s) {
         return matrixOperation(this, new MatrixOperation() {
-            public double operation(double val) {
+            public double operation(int row, int col, double val) {
                 if (val == 0.0) {
                     return 0.0;
                 }
@@ -108,7 +108,7 @@ public class Matrix {
     public Matrix add(Matrix m) {
         return elementWiseOperation("add", this, m,
             new MatrixElementWiseOperation() {
-                public double operation(double aVal, double bVal) {
+                public double operation(int row, int col, double aVal, double bVal) {
                     return aVal + bVal;
                 }
             }
@@ -118,7 +118,7 @@ public class Matrix {
     public Matrix subtract(Matrix m) {
         return elementWiseOperation("subtract", this, m,
             new MatrixElementWiseOperation() {
-                public double operation(double aVal, double bVal) {
+                public double operation(int row, int col, double aVal, double bVal) {
                     return aVal - bVal;
                 }
             }
@@ -128,7 +128,7 @@ public class Matrix {
     public Matrix multiplyElementWise(Matrix m) {
         return elementWiseOperation("multiplyElementWise", this, m,
             new MatrixElementWiseOperation() {
-                public double operation(double aVal, double bVal) {
+                public double operation(int row, int col, double aVal, double bVal) {
                     if (aVal == 0.0 || bVal == 0.0) {
                         return 0.0;
                     }
@@ -296,8 +296,7 @@ public class Matrix {
          
          final double range = max - min;
          return matrixOperation(m, new MatrixOperation() {
-            @Override
-            public double operation(double val) {
+            public double operation(int row, int col, double val) {
                 return random.nextDouble() * range + min;
             }
          });
@@ -387,7 +386,7 @@ public class Matrix {
         
         for(int j = 0; j < rows; j++) {
             for(int i = 0; i < columns; i++) {
-                r.setValue(j, i, op.operation(a.getValue(j, i), b.getValue(j, i)));
+                r.setValue(j, i, op.operation(j, i, a.getValue(j, i), b.getValue(j, i)));
             }
         }
         
@@ -402,7 +401,7 @@ public class Matrix {
         
         for(int j = 0; j < rows; j++) {
             for(int i = 0; i < columns; i++) {
-                r.setValue(j, i, op.operation(a.getValue(j, i)));
+                r.setValue(j, i, op.operation(j, i, a.getValue(j, i)));
             }
         }
         
@@ -410,11 +409,11 @@ public class Matrix {
     }
     
     public static interface MatrixElementWiseOperation {
-        double operation(double aVal, double bVal);
+        double operation(int row, int col, double aVal, double bVal);
     }
     
     public static interface MatrixOperation {
-        double operation(double val);
+        double operation(int row, int col, double val);
     }
 
 

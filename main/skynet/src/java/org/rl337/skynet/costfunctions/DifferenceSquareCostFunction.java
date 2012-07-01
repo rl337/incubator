@@ -15,4 +15,11 @@ public class DifferenceSquareCostFunction implements CostFunction {
         
         return errorSq.divide(2 * m).sumRows();
     }
+    
+    public Matrix gradient(Hypothesis h, Matrix theta, Matrix x, Matrix y) {
+        Matrix hx = h.guess(theta, x);
+        Matrix deltas = hx.subtract(y);
+        Matrix gradient = deltas.transpose().multiply(x).transpose();
+        return gradient;
+    }
 }
