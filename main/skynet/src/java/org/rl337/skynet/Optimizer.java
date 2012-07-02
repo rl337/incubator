@@ -1,12 +1,24 @@
 package org.rl337.skynet;
 
-import org.rl337.skynet.optimizers.ConjugateGradientOptimizer;
-import org.rl337.skynet.optimizers.GradientDescentOptimizer;
 import org.rl337.skynet.types.Matrix;
 
-public interface Optimizer {
-    Matrix run(double alpha, int iterations, Matrix theta, Hypothesis h, CostFunction c, Matrix x, Matrix y);
+public abstract class Optimizer {
+    private Hypothesis mHypothesis;
+    private CostFunction mCostFunction;
     
-    public static final Optimizer GradientDescent = new GradientDescentOptimizer();
-    public static final Optimizer ConjugateGradient = new ConjugateGradientOptimizer();
+    protected Optimizer(Hypothesis h, CostFunction c) {
+        mHypothesis = h;
+        mCostFunction = c;
+    }
+    
+    public abstract Matrix run(Matrix theta, Matrix x, Matrix y, int maxIteration, double epsilon);
+
+    public Hypothesis getHypothesis() {
+        return mHypothesis;
+    }
+    
+    public CostFunction getCostFunction() {
+        return mCostFunction;
+    }
+
 }

@@ -5,9 +5,13 @@ import org.rl337.skynet.Hypothesis;
 import org.rl337.skynet.Optimizer;
 import org.rl337.skynet.types.Matrix;
 
-public class ConjugateGradientOptimizer implements Optimizer {
+public class ConjugateGradientOptimizer extends Optimizer {
     
-    public Matrix run(double alpha2, int iterations, Matrix theta, Hypothesis h, CostFunction c, Matrix x, Matrix y) {
+    protected ConjugateGradientOptimizer(Hypothesis h, CostFunction c) {
+        super(h, c);
+    }
+
+    public Matrix run(Matrix theta, Matrix x, Matrix y, int iterations, double epsilon) {
         
         Matrix result = theta;
 

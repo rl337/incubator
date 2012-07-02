@@ -270,6 +270,30 @@ public class Matrix {
         return sum() / (mRows * mColumns);
     }
     
+    public Stats stats() {
+        double elements = mRows * mColumns;
+
+        double max = getValue(0, 0);
+        double min = max;
+        
+        double variance = 0;
+        double mean = 0;
+        for (int j = 0; j < mRows; j++) {
+            for (int i = 0; i < mColumns; i++) {
+                double value = getValue(j, i);
+                
+                if (value > max) { max = value; }
+                if (value < min) { min = value; }
+                
+                variance += (value * value) / elements;
+                mean += value / elements;
+            }
+        }
+        
+        double stddev = Math.sqrt(variance - mean * mean);
+        return new Stats(mean, stddev, variance, max, min);
+    }
+    
     public static Matrix zeros(int rows, int columns) {
         return new Matrix(columns, rows);
     }
@@ -311,13 +335,17 @@ public class Matrix {
     }
     
     public static Matrix matrix(double[][] values) {
-        int rows = values.length;
+        return matrix(values, 0, values.length);
+    }
+    
+    public static Matrix matrix(double[][] values, int startRow, int maxRows) {
+        int rows = maxRows;
         int cols = values[0].length;
         Matrix m = zeros(rows, cols);
         
         for(int i = 0; i < rows; i++) {
             for(int j = 0; j < cols; j++) {
-                m.setValue(i, j, values[i][j]);
+                m.setValue(i, j, values[i + startRow][j]);
             }
         }
         
@@ -415,6 +443,21 @@ public class Matrix {
     public static interface MatrixOperation {
         double operation(int row, int col, double val);
     }
-
+    
+    public static class Stats {
+        public final double mean;
+        public final double deviation;
+        public final double variance;
+        public final double max;
+        public final double min;
+        
+        public Stats(double mean, double deviation, double variance, double max, double min) {
+            this.mean = mean;
+            this.deviation = deviation;
+            this.variance = variance;
+            this.max = max;
+            this.min = min;
+        }
+    }
 
 }
