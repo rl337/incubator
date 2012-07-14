@@ -5,11 +5,12 @@ import org.rl337.skynet.types.Matrix;
 public class LinearRegressionSandbox {
 
     public static void main(String[] args) {
-        Matrix x = Matrix.random(1000, 1, 0.0, 1.0);
-        Matrix y = Matrix.random(1000, 1, 0.75, 1.0);
+        Matrix testData = TestData.testMatrix(4.0, 0.75, 0.1, 1000);
+        Matrix x = testData.sliceColumn(0);
+        Matrix y = testData.sliceColumn(1);
         
         String scatterPlotName = "Scatter X vs Y";
-        Sketchpad pad = new Sketchpad("test plot", scatterPlotName, 640, 640, 0.0, 1.0, 0.0, 1.0);
+        Sketchpad pad = new Sketchpad("test plot", scatterPlotName, 640, 640);
         pad.plotScatterChart(scatterPlotName, x, y);
         
         Matrix x1 = Matrix.ones(x.getRows(), 1).appendColumns(x);
