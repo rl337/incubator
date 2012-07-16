@@ -1,5 +1,6 @@
 package org.rl337.skynet;
 
+import org.rl337.skynet.optimizers.GradientDescentOptimizer;
 import org.rl337.skynet.types.Matrix;
 
 public class LinearRegressionSandbox {
@@ -14,14 +15,12 @@ public class LinearRegressionSandbox {
         pad.plotScatterChart(scatterPlotName, x, y);
         
         Matrix x1 = Matrix.ones(x.getRows(), 1).appendColumns(x);
-        Matrix theta = Optimizer.GradientDescent.run(
-            0.0125,
-            10000,
+        GradientDescentOptimizer optimizer = new GradientDescentOptimizer(0.0125, Hypothesis.LinearRegression, CostFunction.DifferenceSquare);
+        Matrix theta = optimizer.run(
             Matrix.zeros(2,1), 
-            Hypothesis.LinearRegression,
-            CostFunction.DifferenceSquare,
             x1,
-            y
+            y,
+            10000
         );
         
         System.out.println("Completed learning: " + theta);

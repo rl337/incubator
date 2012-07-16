@@ -1,5 +1,6 @@
 package org.rl337.skynet;
 
+import org.rl337.skynet.optimizers.GradientDescentOptimizer;
 import org.rl337.skynet.types.Matrix;
 import junit.framework.TestCase;
 
@@ -8,14 +9,12 @@ public class LinearRegressionGradientDescentTest extends TestCase {
     public Matrix runLinearRegression(Matrix x, Matrix y, int iterations, double alpha) {
         
         Matrix x1 = Matrix.ones(x.getRows(), 1).appendColumns(x);
-        Matrix theta = Optimizer.GradientDescent.run(
-            alpha,
-            iterations,
+        GradientDescentOptimizer optimizer = new GradientDescentOptimizer(alpha, Hypothesis.LinearRegression, CostFunction.DifferenceSquare);
+        Matrix theta = optimizer.run(
             Matrix.zeros(2,1), 
-            Hypothesis.LinearRegression,
-            CostFunction.DifferenceSquare,
             x1,
-            y
+            y,
+            iterations
         );
         
         return theta;

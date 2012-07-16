@@ -128,10 +128,6 @@ public class MatrixTest extends TestCase {
         Matrix a = Matrix.matrix(vals1);
         Matrix b = Matrix.matrix(vals2);
         
-        //Matrix c = Matrix.matrix(resultvals);
-        //System.out.println(a.multiply(b));
-        //System.out.println(c);
-        
         assertMatrix(a.multiply(b), resultvals);
     }
     
@@ -370,6 +366,23 @@ public class MatrixTest extends TestCase {
         Matrix b = Matrix.matrix(bvals);
         
         assertEquals(3.0, b.mean());
+    }
+    
+    public void testStats() {
+        double[][] vals = new double[][] {
+                { 2, 4, 4, 4 },
+                { 5, 5, 7, 9 }
+        };
+        
+        Matrix m = Matrix.matrix(vals);
+        Matrix.Stats stats = m.stats();
+        
+        assertEquals("mean", 5.0, stats.mean);
+        assertEquals("deviation", 2.0, stats.deviation);
+        assertEquals("variance", 29.0, stats.variance);
+        assertEquals("min", 2.0, stats.min);
+        assertEquals("max", 9.0, stats.max);
+        
     }
     
 }
