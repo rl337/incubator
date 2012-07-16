@@ -21,28 +21,28 @@ public class LinearRegressionSandbox {
         
         Matrix x1 = Matrix.ones(x.getRows(), 1).appendColumns(x);
         
-        GradientDescentOptimizer optimizer = new GradientDescentOptimizer(0.001, Hypothesis.LinearRegression, CostFunction.DifferenceSquare, true);
+        GradientDescentOptimizer optimizer = new GradientDescentOptimizer(0.0003, Hypothesis.LinearRegression, CostFunction.DifferenceSquare, true);
         Matrix theta = optimizer.run(
             Matrix.zeros(2,1), 
             x1,
             y,
             100000,
-            1.0E-50
+            1.0E-30
         );
         
         Matrix debugInfo = optimizer.getDebugData();
         if (debugInfo != null) {
             
-            Matrix.Stats debugStats = debugInfo.stats();
+            Matrix debugX = debugInfo.sliceColumn(0);
+            Matrix debugY = Log.RealLog.evaluate(Matrix.ones(debugInfo.getRows(), 1).add(debugInfo.sliceColumn(1)));
+
+            Matrix.Stats debugStats = debugY.stats();
             System.out.println("Debug Stats for " + name);
             System.out.println("   Size: " + debugInfo.getRows());
             System.out.println("    Min: " + debugStats.min);
             System.out.println("    Max: " + debugStats.max);
             System.out.println("   Mean: " + debugStats.mean);
             
-            
-            Matrix debugX = debugInfo.sliceColumn(0);
-            Matrix debugY = Log.RealLog.evaluate(debugInfo.sliceColumn(1));
             pad.plotScatterChart("debug", debugX, debugY);
             
         }

@@ -62,7 +62,7 @@ public class GradientDescentOptimizer extends Optimizer {
         }
         
         if (mDebug) {
-            mDebugData = Matrix.matrix(debugValues, 0, i / smDebugSampleSize);
+            mDebugData = Matrix.matrix(debugValues, 1, i / smDebugSampleSize - 1);
         }
         
         return result;

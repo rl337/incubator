@@ -24,12 +24,12 @@ public class Sketchpad {
     
     public Sketchpad(String title, String firstPageName, int width, int height) {
         DrawPanel panel = new DrawPanel(firstPageName, width, height);
-        init(firstPageName, panel, width, height);
+        init(title, panel, width, height);
     }
     
     public Sketchpad(String title, String firstPageName, int width, int height, double minX, double maxX, double minY, double maxY) {
         DrawPanel panel = new DrawPanel(firstPageName, width, height, minX, maxX, minY, maxY);
-        init(firstPageName, panel, width, height);
+        init(title, panel, width, height);
     }
     
     private void init(String title, DrawPanel panel, int width, int height) {
