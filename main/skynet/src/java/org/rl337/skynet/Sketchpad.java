@@ -180,6 +180,8 @@ public class Sketchpad {
         public void paint(Graphics g) {
             BufferedImage img = mImageMap.get(mActiveImageName).getImage();
             g.drawImage(img, 0, 0, img.getWidth(), img.getHeight(), 0, 0, img.getWidth(), img.getHeight(), null);
+            g.setColor(Color.YELLOW);
+            g.drawString(mActiveImageName, 20, 20);
         }
 
     }
