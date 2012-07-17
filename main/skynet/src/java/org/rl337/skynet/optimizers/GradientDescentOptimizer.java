@@ -36,6 +36,7 @@ public class GradientDescentOptimizer extends Optimizer {
         }
         
         int i;
+        int debugSize = 0;
         for(i = 0; i < maxIterations; i++) {
             // Calculates Gradient
             Matrix gradient = c.gradient(h, result, x, y);
@@ -58,11 +59,12 @@ public class GradientDescentOptimizer extends Optimizer {
                 int index = i / smDebugSampleSize;
                 debugValues[index][0] = i;
                 debugValues[index][1] = error;
+                debugSize++;
             }
         }
         
-        if (mDebug) {
-            mDebugData = Matrix.matrix(debugValues, 1, i / smDebugSampleSize - 1);
+        if (mDebug && debugSize > 0) {
+            mDebugData = Matrix.matrix(debugValues, 1, debugSize - 1);
         }
         
         return result;

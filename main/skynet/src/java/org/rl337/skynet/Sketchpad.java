@@ -5,6 +5,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
@@ -48,6 +50,30 @@ public class Sketchpad {
             public void mouseExited(MouseEvent arg0) { }
             public void mousePressed(MouseEvent arg0) { }
             public void mouseReleased(MouseEvent arg0) { }
+        });
+        
+        mFrame.addKeyListener(new KeyListener() {
+
+            public void keyPressed(KeyEvent arg0) {
+                switch(arg0.getKeyCode()) {
+                    case KeyEvent.VK_LEFT:
+                        mPanel.prevImage();
+                        break;
+                    case KeyEvent.VK_RIGHT:
+                        mPanel.nextImage();
+                        break;
+                    default:
+                }
+                refresh();
+            }
+
+            public void keyReleased(KeyEvent arg0) {
+            }
+
+            public void keyTyped(KeyEvent arg0) {
+
+            }
+            
         });
         
         mFrame.getContentPane().add(mPanel, BorderLayout.CENTER);
@@ -132,6 +158,22 @@ public class Sketchpad {
             }
             
             index = (index + 1) % names.length;
+            setActiveImage(names[index]);
+        }
+        
+        public void prevImage() {
+            String[] names = mImageMap.keySet().toArray(new String[]{});
+            Arrays.sort(names);
+            
+            int index = 0;
+            for (int i = 0; i < names.length; i++) {
+                if (names[i].equals(mActiveImageName)) {
+                    index = i;
+                    break;
+                }
+            }
+            
+            index = (index + names.length - 1) % names.length;
             setActiveImage(names[index]);
         }
 
