@@ -81,13 +81,13 @@ public class Sketchpad {
         mFrame.setVisible(true);
     }
 
-    public void plotScatterChart(String name, Matrix x, Matrix y) {
-        mPanel.plotScatterChart(name, x, y);
+    public void plotScatterChart(String name, Shape shape, Matrix x, Matrix y) {
+        mPanel.plotScatterChart(name, shape, x, y);
         refresh();
     }
     
-    public void plotScatterChart(String name, Matrix x, Matrix y, ConditionalPlot condition) {
-        mPanel.plotScatterChart(name, x, y, condition);
+    public void plotScatterChart(String name, Shape shape, Matrix x, Matrix y, ConditionalPlot condition) {
+        mPanel.plotScatterChart(name, shape, x, y, condition);
         refresh();
     }
     
@@ -111,17 +111,17 @@ public class Sketchpad {
             init(new SketchpadImage(width, height), firstPageName, width, height);
         }
         
-        public void plotScatterChart(String name, Matrix x, Matrix y) {
+        public void plotScatterChart(String name, Shape shape, Matrix x, Matrix y) {
             setActiveImage(name);
             SketchpadImage image = mImageMap.get(name);
-            image.plotScatterChart(x, y);
+            image.plotScatterChart(shape, x, y);
             invalidate();
         }
         
-        public void plotScatterChart(String name, Matrix x, Matrix y, ConditionalPlot condition) {
+        public void plotScatterChart(String name, Shape shape, Matrix x, Matrix y, ConditionalPlot condition) {
             setActiveImage(name);
             SketchpadImage image = mImageMap.get(name);
-            image.plotScatterChart(x, y, condition);
+            image.plotScatterChart(shape, x, y, condition);
             invalidate();
         }
         
@@ -187,7 +187,16 @@ public class Sketchpad {
     }
     
     public static class SketchpadImage {
-        private static final Color[] smColors = new Color[] {Color.RED, Color.BLUE, Color.YELLOW, Color.MAGENTA, Color.GREEN, Color.ORANGE, Color.CYAN, Color.LIGHT_GRAY};
+        private static final Color[] smColors = new Color[] {
+            new Color(0xFF, 0x40, 0x40), 
+            new Color(0x60, 0x60, 0xFF), 
+            new Color(0xFF, 0xFF, 0x10), 
+            Color.MAGENTA, 
+            new Color(0x10, 0xFF, 0x10), 
+            Color.ORANGE, 
+            Color.CYAN, 
+            Color.LIGHT_GRAY
+        };
 
         private BufferedImage mImage;
         private int mColorIndex;
@@ -261,7 +270,7 @@ public class Sketchpad {
             
         }
         
-        public void plotScatterChart(Matrix x, Matrix y, ConditionalPlot condition) {
+        public void plotScatterChart(Shape shape, Matrix x, Matrix y, ConditionalPlot condition) {
             if (y.getColumns() > 1) {
                 throw new IllegalArgumentException("the range of a plot must be only a single column wide");
             }
@@ -295,14 +304,26 @@ public class Sketchpad {
                     int xcoord = padding + (int) ((xi - mMinX) / xrange * (mWidth - 2*padding));
                     int ycoord = padding + (mHeight - 2*padding) - (int) ((yi - mMinY) / yrange * (mHeight - 2*padding));
                     
-                    g.drawOval(xcoord, ycoord, 5, 5);
+                    switch(shape) {
+                        case X:
+                            g.drawLine(xcoord - 2, ycoord - 2, xcoord + 2, ycoord + 2);
+                            g.drawLine(xcoord + 2, ycoord - 2, xcoord - 2, ycoord + 2);
+                            break;
+                        case Square:
+                            g.drawRect(xcoord - 2, ycoord - 2, 4, 4);
+                            break;
+                        case Circle:
+                        default:
+                            g.drawOval(xcoord - 2, ycoord - 2, 4, 4);
+                            break;
+                    }
                 }
             }
             mImage.flush();
         }
 
-        public void plotScatterChart(Matrix x, Matrix y) {
-            plotScatterChart(x, y, PLOT_ALWAYS);
+        public void plotScatterChart(Shape shape, Matrix x, Matrix y) {
+            plotScatterChart(shape, x, y, PLOT_ALWAYS);
         }
         
         public Graphics2D getGraphics() {
@@ -323,5 +344,11 @@ public class Sketchpad {
             return true;
         }
     };
+    
+    public static enum Shape {
+        Circle,
+        Square,
+        X
+    }
 
 }

@@ -1,5 +1,6 @@
 package org.rl337.skynet;
 
+import org.rl337.skynet.Sketchpad.Shape;
 import org.rl337.skynet.optimizers.GradientDescentOptimizer;
 import org.rl337.skynet.types.Log;
 import org.rl337.skynet.types.Matrix;
@@ -15,7 +16,7 @@ public class LinearRegressionSandbox {
         
         String scatterPlotName = "Scatter X vs Y";
         Sketchpad pad = new Sketchpad("test plot", scatterPlotName, 640, 640);
-        pad.plotScatterChart(scatterPlotName, x, ynorm);
+        pad.plotScatterChart(scatterPlotName, Shape.Circle, x, ynorm);
         
         
         Matrix x1 = Matrix.ones(x.getRows(), 1).appendColumns(x);
@@ -41,7 +42,7 @@ public class LinearRegressionSandbox {
             System.out.println("    Max: " + debugStats.max);
             System.out.println("   Mean: " + debugStats.mean);
             
-            pad.plotScatterChart("debug", debugX, debugY);
+            pad.plotScatterChart("debug", Shape.X, debugX, debugY);
             
         }
         
@@ -49,6 +50,6 @@ public class LinearRegressionSandbox {
         System.out.println("Completed learning for: " + scatterPlotName + "\nTheta:\n" + theta + "Cost: " + cost);
         
         Matrix hx = Hypothesis.LinearRegression.guess(theta, x1);
-        pad.plotScatterChart(scatterPlotName, x, hx);
+        pad.plotScatterChart(scatterPlotName, Shape.Square, x, hx);
     }
 }

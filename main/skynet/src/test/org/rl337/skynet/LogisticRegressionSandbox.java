@@ -1,5 +1,6 @@
 package org.rl337.skynet;
 
+import org.rl337.skynet.Sketchpad.Shape;
 import org.rl337.skynet.optimizers.GradientDescentOptimizer;
 import org.rl337.skynet.types.Log;
 import org.rl337.skynet.types.Matrix;
@@ -35,7 +36,7 @@ public class LogisticRegressionSandbox {
             System.out.println("    Max: " + debugStats.max);
             System.out.println("   Mean: " + debugStats.mean);
             
-            pad.plotScatterChart("debug", debugX, debugY);
+            pad.plotScatterChart("debug", Shape.Circle, debugX, debugY);
         }
         
         Matrix cost = CostFunction.LogisticRegression.cost(Hypothesis.LogisticRegression, optimalTheta, x1, y);
@@ -45,21 +46,21 @@ public class LogisticRegressionSandbox {
         
         String drawing = "Label data";
         
-        pad.plotScatterChart(drawing, x.sliceColumn(0), x.sliceColumn(1), new Sketchpad.ConditionalPlot() {
+        pad.plotScatterChart(drawing, Shape.Square, x.sliceColumn(0), x.sliceColumn(1), new Sketchpad.ConditionalPlot() {
             public boolean valid(int row, int col, double xcoord, double ycoord) {
                 return y.getValue(row, col) < 1;
             }
         });
         
-        pad.plotScatterChart(drawing, x.sliceColumn(0), x.sliceColumn(1), new Sketchpad.ConditionalPlot() {
+        pad.plotScatterChart(drawing, Shape.X, x.sliceColumn(0), x.sliceColumn(1), new Sketchpad.ConditionalPlot() {
             public boolean valid(int row, int col, double xcoord, double ycoord) {
                 return y.getValue(row, col) > 0;
             }
         });
 
         
-        pad.plotScatterChart("Hypothesis", x.sliceColumn(0), x.sliceColumn(1));
-        pad.plotScatterChart("Hypothesis", x.sliceColumn(0), x.sliceColumn(1), new Sketchpad.ConditionalPlot() {
+        pad.plotScatterChart("Hypothesis", Shape.X, x.sliceColumn(0), x.sliceColumn(1));
+        pad.plotScatterChart("Hypothesis", Shape.Circle, x.sliceColumn(0), x.sliceColumn(1), new Sketchpad.ConditionalPlot() {
             public boolean valid(int row, int col, double xcoord, double ycoord) {
                 return hx.getValue(row, col) >= 0.5;
             }
