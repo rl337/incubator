@@ -7,7 +7,7 @@ import org.rl337.skynet.types.Matrix;
 
 public class LogisticRegressionCostFunction implements CostFunction {
 
-    public Matrix cost(Hypothesis h, Matrix theta, Matrix x, Matrix y) {
+    public Matrix cost(Hypothesis h, Matrix theta, Matrix x, Matrix y, double lambda) {
         
         Matrix hx = h.guess(theta, x);
         Matrix ones = Matrix.ones(y.getRows(), y.getColumns());
@@ -16,15 +16,20 @@ public class LogisticRegressionCostFunction implements CostFunction {
         Matrix term2 = ones.subtract(y).multiplyElementWise(Log.RealLog.evaluate(ones.subtract(hx)));
         Matrix whole = term1.add(term2);
         
+        
         int m = y.getRows();
-        return whole.divide(m).sumRows().multiply(-1);
+        double regularization = lambda / (2 * m) * (theta.sliceRows(1, theta.getRows() - 1).sum());
+        return whole.divide(m).sumRows().multiply(-1).add(regularization);
     }
 
-    public Matrix gradient(Hypothesis h, Matrix theta, Matrix x, Matrix y) {
+    public Matrix gradient(Hypothesis h, Matrix theta, Matrix x, Matrix y, double lambda) {
         Matrix hx = h.guess(theta, x);
         Matrix deltas = hx.subtract(y);
         Matrix gradient = deltas.transpose().multiply(x).transpose();
-        return gradient;
+        
+        int m = y.getRows();
+        double regularization = lambda / m;
+        return gradient.add(theta.add(regularization));
     }
 
 }

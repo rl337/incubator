@@ -8,18 +8,20 @@ import org.rl337.skynet.types.Matrix;
 public class GradientDescentOptimizer extends Optimizer {
     private static final int smDebugSampleSize = 100;
     private double mAlpha;
+    private double mLambda;
     private boolean mDebug;
     private Matrix mDebugData;
 
-    public GradientDescentOptimizer(double alpha, Hypothesis h, CostFunction c, boolean debug) {
+    public GradientDescentOptimizer(double alpha, Hypothesis h, CostFunction c, double lambda, boolean debug) {
         super(h, c);
         mDebug = debug;
         mAlpha = alpha;
+        mLambda = lambda;
         mDebugData = null;
     }
     
-    public GradientDescentOptimizer(double alpha, Hypothesis h, CostFunction c) {
-        this(alpha, h, c, false);
+    public GradientDescentOptimizer(double alpha, Hypothesis h, CostFunction c, double lambda) {
+        this(alpha, h, c, lambda, false);
     }
 
     public Matrix run(Matrix theta, Matrix x, Matrix y, int maxIterations, double epsilon) {
@@ -39,7 +41,7 @@ public class GradientDescentOptimizer extends Optimizer {
         int debugSize = 0;
         for(i = 0; i < maxIterations; i++) {
             // Calculates Gradient
-            Matrix gradient = c.gradient(h, result, x, y);
+            Matrix gradient = c.gradient(h, result, x, y, mLambda);
             
            // Performs iteration
             result = result.subtract(gradient.multiply(mAlpha / m));

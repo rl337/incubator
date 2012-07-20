@@ -9,7 +9,7 @@ public class LinearRegressionGradientDescentTest extends TestCase {
     public Matrix runLinearRegression(Matrix x, Matrix y, int iterations, double alpha) {
         
         Matrix x1 = Matrix.ones(x.getRows(), 1).appendColumns(x);
-        GradientDescentOptimizer optimizer = new GradientDescentOptimizer(alpha, Hypothesis.LinearRegression, CostFunction.DifferenceSquare);
+        GradientDescentOptimizer optimizer = new GradientDescentOptimizer(alpha, Hypothesis.LinearRegression, CostFunction.DifferenceSquare, 1.0);
         Matrix theta = optimizer.run(
             Matrix.zeros(2,1), 
             x1,

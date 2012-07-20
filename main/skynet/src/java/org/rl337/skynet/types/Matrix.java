@@ -137,6 +137,28 @@ public class Matrix {
             }
         );
     }
+
+    
+    public Matrix add(final double v) {
+        return matrixOperation(this,
+            new MatrixOperation() {
+                public double operation(int row, int col, double val) {
+                    return val + v;
+                }
+            }
+        );
+    }
+    
+
+    public Matrix pow(final double i) {
+        return matrixOperation(this,
+            new MatrixOperation() {
+                public double operation(int row, int col, double val) {
+                    return Math.pow(val, i);
+                }
+            }
+        );
+    }
     
     public double sum() {
         double r = 0.0;
@@ -459,5 +481,6 @@ public class Matrix {
             this.min = min;
         }
     }
+
 
 }

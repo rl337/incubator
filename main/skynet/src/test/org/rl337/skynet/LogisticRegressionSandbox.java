@@ -11,15 +11,15 @@ public class LogisticRegressionSandbox {
         Matrix x = testData.sliceColumns(0, 1);
         final Matrix y = testData.sliceColumn(2);
         
-        Sketchpad pad = new Sketchpad("Logistic Regression Sandbox", "debug", 640, 640);
+        Sketchpad pad = new Sketchpad("Logistic Regression Sandbox", "Cost over Iterations", 640, 640);
         
         Matrix x1 = Matrix.ones(x.getRows(), 1).appendColumns(x);
-        GradientDescentOptimizer optimizer = new GradientDescentOptimizer(0.01, Hypothesis.LogisticRegression, CostFunction.LogisticRegression, true);
+        GradientDescentOptimizer optimizer = new GradientDescentOptimizer(0.01, Hypothesis.LogisticRegression, CostFunction.LogisticRegression, 1.0, true);
         Matrix optimalTheta = optimizer.run(
             Matrix.zeros(3,1), 
             x1,
             y,
-            10000,
+            150000,
             1.0E-30
         );
         
@@ -36,23 +36,22 @@ public class LogisticRegressionSandbox {
             System.out.println("    Max: " + debugStats.max);
             System.out.println("   Mean: " + debugStats.mean);
             
-            pad.plotScatterChart("debug", Shape.Circle, debugX, debugY);
+            pad.plotScatterChart("Cost over Iterations", Shape.Circle, debugX, debugY);
         }
         
-        Matrix cost = CostFunction.LogisticRegression.cost(Hypothesis.LogisticRegression, optimalTheta, x1, y);
+        Matrix cost = CostFunction.LogisticRegression.cost(Hypothesis.LogisticRegression, optimalTheta, x1, y, 1.0);
         System.out.println("Completed learning: " + "\nTheta:\n" + optimalTheta + "Cost: " + cost);
         
         final Matrix hx = Hypothesis.LogisticRegression.guess(optimalTheta, x1);
         
         String drawing = "Label data";
-        
-        pad.plotScatterChart(drawing, Shape.Square, x.sliceColumn(0), x.sliceColumn(1), new Sketchpad.ConditionalPlot() {
+        pad.plotScatterChart(drawing, Shape.X, x.sliceColumn(0), x.sliceColumn(1), new Sketchpad.ConditionalPlot() {
             public boolean valid(int row, int col, double xcoord, double ycoord) {
                 return y.getValue(row, col) < 1;
             }
         });
         
-        pad.plotScatterChart(drawing, Shape.X, x.sliceColumn(0), x.sliceColumn(1), new Sketchpad.ConditionalPlot() {
+        pad.plotScatterChart(drawing, Shape.Circle, x.sliceColumn(0), x.sliceColumn(1), new Sketchpad.ConditionalPlot() {
             public boolean valid(int row, int col, double xcoord, double ycoord) {
                 return y.getValue(row, col) > 0;
             }

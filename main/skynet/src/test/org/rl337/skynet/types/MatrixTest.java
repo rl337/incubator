@@ -56,6 +56,28 @@ public class MatrixTest extends TestCase {
         assertMatrix(m, new double[][] {{vals[0][0]},{vals[0][1]},{vals[0][2]}});
     }
     
+    public void testScalarAdd() {
+        Random rand = new Random();
+        double[][] vals = new double[][] {
+            {rand.nextDouble(), rand.nextDouble(), rand.nextDouble()}
+        };
+        double val = rand.nextDouble();
+        Matrix m = Matrix.vector(vals[0]);
+        Matrix x = m.add(val);
+        assertMatrix(x, new double[][] {{vals[0][0] + val},{vals[0][1] + val},{vals[0][2] + val}});
+    }
+    
+    public void testScalarPower() {
+        Random rand = new Random();
+        double[][] vals = new double[][] {
+            {rand.nextDouble(), rand.nextDouble(), rand.nextDouble()}
+        };
+        
+        Matrix m = Matrix.vector(vals[0]);
+        Matrix x = m.pow(2);
+        assertMatrix(x, new double[][] {{Math.pow(vals[0][0], 2)},{Math.pow(vals[0][1], 2)},{Math.pow(vals[0][2], 2)}});
+    }
+    
     public void testEquals() {
         Random rand = new Random();
         double[][] vals1 = new double[][] {

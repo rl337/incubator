@@ -6,7 +6,7 @@ import org.rl337.skynet.types.Matrix;
 
 public class DifferenceSquareCostFunction implements CostFunction {
 
-    public Matrix cost(Hypothesis h, Matrix theta, Matrix x, Matrix y) {
+    public Matrix cost(Hypothesis h, Matrix theta, Matrix x, Matrix y, double lambda) {
         Matrix hx = h.guess(theta, x);
         Matrix error = hx.subtract(y);
         Matrix errorSq = error.multiplyElementWise(error);
@@ -16,7 +16,7 @@ public class DifferenceSquareCostFunction implements CostFunction {
         return errorSq.divide(2 * m).sumRows();
     }
     
-    public Matrix gradient(Hypothesis h, Matrix theta, Matrix x, Matrix y) {
+    public Matrix gradient(Hypothesis h, Matrix theta, Matrix x, Matrix y, double lambda) {
         Matrix hx = h.guess(theta, x);
         Matrix deltas = hx.subtract(y);
         Matrix gradient = deltas.transpose().multiply(x).transpose();

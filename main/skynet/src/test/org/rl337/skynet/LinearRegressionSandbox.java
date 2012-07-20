@@ -20,7 +20,7 @@ public class LinearRegressionSandbox {
         
         
         Matrix x1 = Matrix.ones(x.getRows(), 1).appendColumns(x);
-        GradientDescentOptimizer optimizer = new GradientDescentOptimizer(0.01, Hypothesis.LinearRegression, CostFunction.DifferenceSquare, true);
+        GradientDescentOptimizer optimizer = new GradientDescentOptimizer(0.01, Hypothesis.LinearRegression, CostFunction.DifferenceSquare, 1.0, true);
         Matrix theta = optimizer.run(
             Matrix.zeros(2,1), 
             x1,
@@ -46,7 +46,7 @@ public class LinearRegressionSandbox {
             
         }
         
-        Matrix cost = CostFunction.DifferenceSquare.cost(Hypothesis.LinearRegression, theta, x1, ynorm);
+        Matrix cost = CostFunction.DifferenceSquare.cost(Hypothesis.LinearRegression, theta, x1, ynorm, 1.0);
         System.out.println("Completed learning for: " + scatterPlotName + "\nTheta:\n" + theta + "Cost: " + cost);
         
         Matrix hx = Hypothesis.LinearRegression.guess(theta, x1);
