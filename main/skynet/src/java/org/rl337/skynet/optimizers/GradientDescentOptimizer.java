@@ -44,7 +44,7 @@ public class GradientDescentOptimizer extends Optimizer {
             Matrix gradient = c.gradient(h, result, x, y, mLambda);
             
            // Performs iteration
-            result = result.subtract(gradient.multiply(mAlpha / m));
+            result = result.subtract(gradient.multiply(mAlpha));
             
             // In theory, score should be decreasing over time...
             // check to see if delta score is less than epsilon.

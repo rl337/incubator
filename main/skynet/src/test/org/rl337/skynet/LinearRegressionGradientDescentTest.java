@@ -9,7 +9,7 @@ public class LinearRegressionGradientDescentTest extends TestCase {
     public Matrix runLinearRegression(Matrix x, Matrix y, int iterations, double alpha) {
         
         Matrix x1 = Matrix.ones(x.getRows(), 1).appendColumns(x);
-        GradientDescentOptimizer optimizer = new GradientDescentOptimizer(alpha, Hypothesis.LinearRegression, CostFunction.DifferenceSquare, 1.0);
+        GradientDescentOptimizer optimizer = new GradientDescentOptimizer(alpha, Hypothesis.LinearRegression, CostFunction.DifferenceSquare, 0.0);
         Matrix theta = optimizer.run(
             Matrix.zeros(2,1), 
             x1,
@@ -21,7 +21,7 @@ public class LinearRegressionGradientDescentTest extends TestCase {
     }
     
     public void testLinearRegression45DegreesNoIntercept() {
-        Matrix testData = TestData.testMatrix(0.0, 1.0, 0.1, 1000);
+        Matrix testData = TestData.testMatrixLinear(0.0, 1.0, 0.1, 1000);
         Matrix x = testData.sliceColumn(0);
         Matrix y = testData.sliceColumn(1);
         
@@ -31,7 +31,7 @@ public class LinearRegressionGradientDescentTest extends TestCase {
     }
     
     public void testLinearRegression60Degrees4Intercept() {
-        Matrix testData = TestData.testMatrix(4.0, 3.0 / 2.0, 0.1, 1000);
+        Matrix testData = TestData.testMatrixLinear(4.0, 3.0 / 2.0, 0.1, 1000);
         Matrix x = testData.sliceColumn(0);
         Matrix y = testData.sliceColumn(1);
         

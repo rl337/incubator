@@ -10,16 +10,19 @@ public class DifferenceSquareCostFunction implements CostFunction {
         Matrix hx = h.guess(theta, x);
         Matrix error = hx.subtract(y);
         Matrix errorSq = error.multiplyElementWise(error);
+        Matrix regularization = theta.pow(2).multiply(lambda).sumRows();
         
         int m = y.getRows();
-        
-        return errorSq.divide(2 * m).sumRows();
+        return errorSq.divide(2 * m).sumRows().add(regularization);
     }
     
     public Matrix gradient(Hypothesis h, Matrix theta, Matrix x, Matrix y, double lambda) {
+        int m = y.getRows();
         Matrix hx = h.guess(theta, x);
         Matrix deltas = hx.subtract(y);
-        Matrix gradient = deltas.transpose().multiply(x).transpose();
+        Matrix regularization = theta.multiply(lambda / m);
+        regularization.setValue(0, 0, 0);
+        Matrix gradient = deltas.transpose().multiply(x).divide(m).transpose().add(regularization);
         return gradient;
     }
 }
