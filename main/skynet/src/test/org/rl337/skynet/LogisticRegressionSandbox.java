@@ -1,69 +1,55 @@
 package org.rl337.skynet;
 
+import java.io.File;
+
 import org.rl337.skynet.Sketchpad.Shape;
 import org.rl337.skynet.optimizers.GradientDescentOptimizer;
 import org.rl337.skynet.types.Log;
 import org.rl337.skynet.types.Matrix;
 
 public class LogisticRegressionSandbox {
-    public static void main(String[] args) {
-        Matrix testData = TestData.testLogisticRegressionMatrix(-2, -0.9, -10, 10, -10, 10, 1000);
-        Matrix x = testData.sliceColumns(0, 1);
-        final Matrix y = testData.sliceColumn(2);
+    public static void main(String[] args) throws Exception {
         
         Sketchpad pad = new Sketchpad("Logistic Regression Sandbox", "Cost over Iterations", 640, 640);
-        
-        Matrix x1 = Matrix.ones(x.getRows(), 1).appendColumns(x);
-        GradientDescentOptimizer optimizer = new GradientDescentOptimizer(0.01, Hypothesis.LogisticRegression, CostFunction.LogisticRegression, 1.0, true);
-        Matrix optimalTheta = optimizer.run(
-            Matrix.zeros(3,1), 
-            x1,
-            y,
-            150000,
-            1.0E-30
-        );
-        
-        Matrix debugInfo = optimizer.getDebugData();
-        if (debugInfo != null) {
-            
-            Matrix debugX = debugInfo.sliceColumn(0);
-            Matrix debugY = Log.RealLog.evaluate(Matrix.ones(debugInfo.getRows(), 1).add(debugInfo.sliceColumn(1)));
 
-            Matrix.Stats debugStats = debugY.stats();
-            System.out.println("Debug Stats for Logistic Regression");
-            System.out.println("   Size: " + debugInfo.getRows());
-            System.out.println("    Min: " + debugStats.min);
-            System.out.println("    Max: " + debugStats.max);
-            System.out.println("   Mean: " + debugStats.mean);
-            
-            pad.plotScatterChart("Cost over Iterations", Shape.Circle, debugX, debugY);
+        Matrix optimalTheta = Matrix.zeros(785, 1); // 28 x 28 pixels + bias
+        for(int i = 0; i < 1; i++) {
+            GradientDescentOptimizer optimizer = new GradientDescentOptimizer(0.01, Hypothesis.LogisticRegression, CostFunction.LogisticRegression, 1.0, true);
+
+            Matrix x = Matrix.loadMNISTPixelData(new File("data/train-images-idx3-ubyte.gz"), i, 60000);
+            Matrix y = Matrix.loadMNISTLabelData(new File("data/train-labels-idx1-ubyte.gz"), i, 60000);
+        
+            Matrix x1 = Matrix.ones(x.getRows(), 1).appendColumns(x);
+            optimalTheta = optimizer.run(
+                optimalTheta, 
+                x1,
+                y,
+                50000,
+                1.0E-30
+            );
+        
+            Matrix debugInfo = optimizer.getDebugData();
+            if (debugInfo != null) {
+                
+                Matrix debugX = debugInfo.sliceColumn(0);
+                Matrix debugY = Log.RealLog.evaluate(Matrix.ones(debugInfo.getRows(), 1).add(debugInfo.sliceColumn(1)));
+    
+                Matrix.Stats debugStats = debugY.stats();
+                System.out.println("Debug Stats for Logistic Regression");
+                System.out.println("   Size: " + debugInfo.getRows());
+                System.out.println("    Min: " + debugStats.min);
+                System.out.println("    Max: " + debugStats.max);
+                System.out.println("   Mean: " + debugStats.mean);
+                
+                pad.plotScatterChart("Cost over Iterations", Shape.Circle, debugX, debugY);
+            }
         }
         
-        Matrix cost = CostFunction.LogisticRegression.cost(Hypothesis.LogisticRegression, optimalTheta, x1, y, 1.0);
-        System.out.println("Completed learning: " + "\nTheta:\n" + optimalTheta + "Cost: " + cost);
+        Matrix x = Matrix.loadMNISTPixelData(new File("data/t10k-images-idx3-ubyte.gz"), 0, 10000);
+        Matrix y = Matrix.loadMNISTLabelData(new File("data/t10k-labels-idx1-ubyte.gz"), 0, 10000);
         
+        Matrix x1 = Matrix.ones(x.getRows(), 1).appendColumns(x);
         final Matrix hx = Hypothesis.LogisticRegression.guess(optimalTheta, x1);
-        
-        String drawing = "Label data";
-        pad.plotScatterChart(drawing, Shape.X, x.sliceColumn(0), x.sliceColumn(1), new Sketchpad.ConditionalPlot() {
-            public boolean valid(int row, int col, double xcoord, double ycoord) {
-                return y.getValue(row, col) < 1;
-            }
-        });
-        
-        pad.plotScatterChart(drawing, Shape.Circle, x.sliceColumn(0), x.sliceColumn(1), new Sketchpad.ConditionalPlot() {
-            public boolean valid(int row, int col, double xcoord, double ycoord) {
-                return y.getValue(row, col) > 0;
-            }
-        });
-
-        
-        pad.plotScatterChart("Hypothesis", Shape.X, x.sliceColumn(0), x.sliceColumn(1));
-        pad.plotScatterChart("Hypothesis", Shape.Circle, x.sliceColumn(0), x.sliceColumn(1), new Sketchpad.ConditionalPlot() {
-            public boolean valid(int row, int col, double xcoord, double ycoord) {
-                return hx.getValue(row, col) >= 0.5;
-            }
-        });
         
         int correct = 0;
         int total = y.getRows();

@@ -4,7 +4,6 @@ import org.rl337.skynet.Sketchpad.Shape;
 import org.rl337.skynet.optimizers.GradientDescentOptimizer;
 import org.rl337.skynet.types.Log;
 import org.rl337.skynet.types.Matrix;
-import org.rl337.skynet.types.Normalize;
 
 public class LinearRegressionSandbox {
 
@@ -20,7 +19,6 @@ public class LinearRegressionSandbox {
         Matrix f = TestData.generatePolynominalFeatures(x, 15);
         //Matrix fnorm = Normalize.normalize.evaluate(f);
         Matrix fnorm = f;
-        
         
         String scatterPlotName = "Scatter X vs Y";
         Sketchpad pad = new Sketchpad("test plot", scatterPlotName, 640, 640);

@@ -25,7 +25,6 @@ public class GradientDescentOptimizer extends Optimizer {
     }
 
     public Matrix run(Matrix theta, Matrix x, Matrix y, int maxIterations, double epsilon) {
-        int m = x.getRows();
         Matrix result = theta;
         
         Hypothesis h = getHypothesis();
