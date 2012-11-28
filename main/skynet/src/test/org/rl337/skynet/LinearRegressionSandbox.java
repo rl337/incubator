@@ -1,6 +1,7 @@
 package org.rl337.skynet;
 
 import org.rl337.skynet.Sketchpad.Shape;
+import org.rl337.skynet.costfunctions.DifferenceSquareCostFunction;
 import org.rl337.skynet.optimizers.GradientDescentOptimizer;
 import org.rl337.skynet.types.Log;
 import org.rl337.skynet.types.Matrix;
@@ -24,15 +25,14 @@ public class LinearRegressionSandbox {
         Sketchpad pad = new Sketchpad("test plot", scatterPlotName, 640, 640);
         pad.plotScatterChart(scatterPlotName, Shape.Circle, x, y);
         
+        CostFunction c = new DifferenceSquareCostFunction(1.0);
         
         //Matrix x1 = Matrix.ones(x.getRows(), 1).appendColumns(x);
-        GradientDescentOptimizer optimizer = new GradientDescentOptimizer(0.0025, Hypothesis.LinearRegression, CostFunction.DifferenceSquare, 2.0, true);
+        GradientDescentOptimizer optimizer = new GradientDescentOptimizer(0.0025, Hypothesis.LinearRegression, c, 40000, 0);
         Matrix theta = optimizer.run(
             Matrix.zeros(fnorm.getColumns(),1), 
             fnorm,
-            y,
-            40000,
-            1.0E-30
+            y
         );
         
         Matrix debugInfo = optimizer.getDebugData();
@@ -52,7 +52,7 @@ public class LinearRegressionSandbox {
             
         }
         
-        Matrix cost = CostFunction.DifferenceSquare.cost(Hypothesis.LinearRegression, theta, fnorm, y, 1.0);
+        Matrix cost = c.cost(Hypothesis.LinearRegression, theta, fnorm, y);
         System.out.println("Completed learning for: " + scatterPlotName + "\nTheta:\n" + theta + "Cost: " + cost);
         
         Matrix hx = Hypothesis.LinearRegression.guess(theta, fnorm);

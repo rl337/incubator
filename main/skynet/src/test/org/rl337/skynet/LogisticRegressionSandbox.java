@@ -3,6 +3,7 @@ package org.rl337.skynet;
 import java.io.File;
 
 import org.rl337.skynet.Sketchpad.Shape;
+import org.rl337.skynet.costfunctions.LogisticRegressionCostFunction;
 import org.rl337.skynet.optimizers.GradientDescentOptimizer;
 import org.rl337.skynet.types.Log;
 import org.rl337.skynet.types.Matrix;
@@ -14,7 +15,8 @@ public class LogisticRegressionSandbox {
 
         Matrix optimalTheta = Matrix.zeros(785, 1); // 28 x 28 pixels + bias
         for(int i = 0; i < 1; i++) {
-            GradientDescentOptimizer optimizer = new GradientDescentOptimizer(0.01, Hypothesis.LogisticRegression, CostFunction.LogisticRegression, 1.0, true);
+            CostFunction c = new LogisticRegressionCostFunction(0.1);
+            GradientDescentOptimizer optimizer = new GradientDescentOptimizer(0.01, Hypothesis.LogisticRegression, c, 50000, 1.0E-30, true);
 
             Matrix x = Matrix.loadMNISTPixelData(new File("data/train-images-idx3-ubyte.gz"), i, 60000);
             Matrix y = Matrix.loadMNISTLabelData(new File("data/train-labels-idx1-ubyte.gz"), i, 60000);
@@ -23,9 +25,7 @@ public class LogisticRegressionSandbox {
             optimalTheta = optimizer.run(
                 optimalTheta, 
                 x1,
-                y,
-                50000,
-                1.0E-30
+                y
             );
         
             Matrix debugInfo = optimizer.getDebugData();

@@ -13,11 +13,7 @@ public abstract class Optimizer {
         mCostFunction = c;
     }
     
-    public abstract Matrix run(Matrix theta, Matrix x, Matrix y, int maxIteration, double epsilon);
-    
-    public Matrix run(Matrix theta, Matrix x, Matrix y, int maxIteration) {
-        return run(theta, x, y, maxIteration, DEFAULT_EPSILON);
-    }
+    public abstract Matrix run(Matrix theta, Matrix x, Matrix y);
 
     public Hypothesis getHypothesis() {
         return mHypothesis;

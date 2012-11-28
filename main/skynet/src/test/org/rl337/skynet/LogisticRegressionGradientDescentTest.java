@@ -2,6 +2,7 @@ package org.rl337.skynet;
 
 import junit.framework.TestCase;
 
+import org.rl337.skynet.costfunctions.LogisticRegressionCostFunction;
 import org.rl337.skynet.optimizers.GradientDescentOptimizer;
 import org.rl337.skynet.types.Matrix;
 
@@ -10,12 +11,12 @@ public class LogisticRegressionGradientDescentTest extends TestCase {
     public Matrix runLogisticRegression(Matrix x, Matrix y, int iterations, double alpha) {
         
         Matrix x1 = Matrix.ones(x.getRows(), 1).appendColumns(x);
-        GradientDescentOptimizer optimizer = new GradientDescentOptimizer(alpha, Hypothesis.LogisticRegression, CostFunction.LogisticRegression, 1.0);
+        CostFunction c = new LogisticRegressionCostFunction(1.0);
+        GradientDescentOptimizer optimizer = new GradientDescentOptimizer(alpha, Hypothesis.LogisticRegression, c, iterations, 0);
         Matrix theta = optimizer.run(
             Matrix.zeros(3,1), 
             x1,
-            y,
-            iterations
+            y
         );
         
         return Hypothesis.LogisticRegression.guess(theta, x1);
@@ -62,7 +63,7 @@ public class LogisticRegressionGradientDescentTest extends TestCase {
         }
         
         double percentWrong = wrong * 100.0 / y.getRows();
-        assertTrue("We expect at least 99% right", percentWrong < 1.0);
+        assertTrue("We expect at least 99% right. Was " + (100.0 - percentWrong), percentWrong < 1.0);
     }
 
 }

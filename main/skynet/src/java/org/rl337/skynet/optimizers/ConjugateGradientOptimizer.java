@@ -2,22 +2,23 @@ package org.rl337.skynet.optimizers;
 
 import org.rl337.skynet.CostFunction;
 import org.rl337.skynet.Hypothesis;
-import org.rl337.skynet.Optimizer;
 import org.rl337.skynet.types.Matrix;
 
-public class ConjugateGradientOptimizer extends Optimizer {
+public class ConjugateGradientOptimizer extends AbstractIterativeOptimizer {
     
-    protected ConjugateGradientOptimizer(Hypothesis h, CostFunction c) {
-        super(h, c);
+    protected ConjugateGradientOptimizer(Hypothesis h, CostFunction c, int iterations, double epsilon, boolean debug) {
+        super(h, c, iterations, epsilon, debug);
     }
 
-    public Matrix run(Matrix theta, Matrix x, Matrix y, int iterations, double epsilon) {
+    public Matrix run(Matrix theta, Matrix x, Matrix y) {
         
         Matrix result = theta;
 
         Matrix r = y.subtract(x.multiply(theta));
         Matrix p=r;
         double rsold=r.transpose().multiply(r).sum();
+        
+        int iterations = getIterations();
      
         for (int i = 0; i < iterations; i++) {
             Matrix Ap = x.multiply(p);
@@ -35,6 +36,12 @@ public class ConjugateGradientOptimizer extends Optimizer {
         }
         
         return result;
+    }
+
+    @Override
+    public Matrix runIteration(Matrix theta, Matrix gradient) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

@@ -191,6 +191,20 @@ public class Matrix {
         return r;
     }
     
+    public Matrix sumColumns() {
+        Matrix r = Matrix.zeros(mRows, 1);
+        
+        for(int i = 0; i < mRows; i++) {
+            double rowVal = 0;
+            for(int j = 0; j < mColumns; j++) {
+                rowVal += getValue(i, j);
+            }
+            r.setValue(i, 0, rowVal);
+        }
+        
+        return r;
+    }
+    
     public boolean equals(Object o) {
         if (! (o instanceof Matrix)) {
             return false;

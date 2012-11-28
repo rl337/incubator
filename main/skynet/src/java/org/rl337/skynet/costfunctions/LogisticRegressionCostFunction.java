@@ -1,13 +1,18 @@
 package org.rl337.skynet.costfunctions;
 
-import org.rl337.skynet.CostFunction;
 import org.rl337.skynet.Hypothesis;
 import org.rl337.skynet.types.Log;
 import org.rl337.skynet.types.Matrix;
 
-public class LogisticRegressionCostFunction implements CostFunction {
+public class LogisticRegressionCostFunction extends AbstractRegularizedCostFunction {
 
-    public Matrix cost(Hypothesis h, Matrix theta, Matrix x, Matrix y, double lambda) {
+    public LogisticRegressionCostFunction(double lambda) {
+        super(lambda);
+    }
+
+    public Matrix cost(Hypothesis h, Matrix theta, Matrix x, Matrix y) {
+        
+        double lambda = getLambda();
         
         Matrix hx = h.guess(theta, x);
         Matrix ones = Matrix.ones(y.getRows(), y.getColumns());
@@ -21,7 +26,9 @@ public class LogisticRegressionCostFunction implements CostFunction {
         return whole.divide(m).sumRows().multiply(-1).add(regularization);
     }
 
-    public Matrix gradient(Hypothesis h, Matrix theta, Matrix x, Matrix y, double lambda) {
+    public Matrix gradient(Hypothesis h, Matrix theta, Matrix x, Matrix y) {
+        double lambda = getLambda();
+        
         Matrix hx = h.guess(theta, x);
         Matrix deltas = hx.subtract(y);
         int m = y.getRows();

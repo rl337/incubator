@@ -1,12 +1,16 @@
 package org.rl337.skynet.costfunctions;
 
-import org.rl337.skynet.CostFunction;
 import org.rl337.skynet.Hypothesis;
 import org.rl337.skynet.types.Matrix;
 
-public class DifferenceSquareCostFunction implements CostFunction {
+public class DifferenceSquareCostFunction extends AbstractRegularizedCostFunction {
 
-    public Matrix cost(Hypothesis h, Matrix theta, Matrix x, Matrix y, double lambda) {
+    public DifferenceSquareCostFunction(double lambda) {
+        super(lambda);
+    }
+
+    public Matrix cost(Hypothesis h, Matrix theta, Matrix x, Matrix y) {
+        double lambda = getLambda();
         Matrix hx = h.guess(theta, x);
         Matrix error = hx.subtract(y);
         Matrix errorSq = error.multiplyElementWise(error);
@@ -16,7 +20,8 @@ public class DifferenceSquareCostFunction implements CostFunction {
         return errorSq.divide(2 * m).sumRows().add(regularization);
     }
     
-    public Matrix gradient(Hypothesis h, Matrix theta, Matrix x, Matrix y, double lambda) {
+    public Matrix gradient(Hypothesis h, Matrix theta, Matrix x, Matrix y) {
+        double lambda = getLambda();
         int m = y.getRows();
         Matrix hx = h.guess(theta, x);
         Matrix deltas = hx.subtract(y);
