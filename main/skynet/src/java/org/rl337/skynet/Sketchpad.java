@@ -91,6 +91,11 @@ public class Sketchpad {
         refresh();
     }
     
+    public void plotAsBitmaps(String name, int bmWidth, int bmHeight, int columns, int rows, Matrix m) {
+        mPanel.plotAsBitmaps(name, bmWidth, bmHeight, columns, rows, m);
+        refresh();
+    }
+    
     public void refresh() {
         mFrame.repaint();
         mFrame.invalidate();
@@ -122,6 +127,13 @@ public class Sketchpad {
             setActiveImage(name);
             SketchpadImage image = mImageMap.get(name);
             image.plotScatterChart(shape, x, y, condition);
+            invalidate();
+        }
+        
+        public void plotAsBitmaps(String name, int bmWidth, int bmHeight, int columns, int rows, Matrix m) {
+            setActiveImage(name);
+            SketchpadImage image = mImageMap.get(name);
+            image.plotBitmaps(bmWidth, bmHeight, columns, rows, m);
             invalidate();
         }
         
@@ -197,6 +209,14 @@ public class Sketchpad {
             Color.CYAN, 
             Color.LIGHT_GRAY
         };
+        
+        private static final Color[] sm256Monochrome;
+        static {
+            sm256Monochrome = new Color[256];
+            for(int i = 0; i < sm256Monochrome.length; i++) {
+                sm256Monochrome[i] = new Color(i, i, i);
+            }
+        }
 
         private BufferedImage mImage;
         private int mColorIndex;
@@ -290,8 +310,8 @@ public class Sketchpad {
             double yrange = mMaxY - mMinY;
             double xrange = mMaxX - mMinX;
             
+            Graphics2D g = getGraphics();
             for(int j = 0; j < x.getColumns(); j++) {
-                Graphics2D g = getGraphics();
                 g.setColor(nextColor());
                 for(int i = 0; i < x.getRows(); i++) {
                     double xi = x.getValue(i, j);
@@ -320,6 +340,44 @@ public class Sketchpad {
                 }
             }
             mImage.flush();
+        }
+        
+        public void plotBitmaps(int bmWidth, int bmHeight, int columns, int rows, Matrix matrix) {
+            int matrixColumns = bmWidth * bmHeight;
+            if (matrix.getColumns() != matrixColumns) {
+                throw new IllegalArgumentException("bitmap width x height should equal matrix columns");
+            }
+            
+            if (rows > matrix.getRows()) {
+                rows = matrix.getRows();
+            }
+            
+            Graphics2D g = getGraphics();
+            int m = 0;
+            int nOffset = 0;
+            for(int n = 0; n < rows; n++) {
+                if (m++ > columns) {
+                    m = 0;
+                    nOffset++;
+                }
+                
+                int xoffset = m * bmWidth + 2;
+                int yoffset = nOffset * bmHeight + 2;
+                
+                for(int x = 0; x < bmWidth; x++) {
+                    for(int y = 0; y < bmHeight; y++) {
+                        double val = matrix.getValue(n, y * bmWidth + x);
+                        if (val < 0 || val > 1.0) {
+                            throw new IllegalArgumentException("bitmap values must be between 0 and 1");
+                        }
+                        
+                        int colorIndex = (int) (val * 256);
+                        g.setColor(sm256Monochrome[colorIndex]);
+                        g.drawRect(xoffset + x, yoffset + y, 1, 1);
+                    }
+                }
+            }
+            
         }
 
         public void plotScatterChart(Shape shape, Matrix x, Matrix y) {
