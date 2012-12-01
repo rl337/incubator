@@ -1,16 +1,6 @@
 package org.rl337.skynet.types;
 
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Random;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.ZipInputStream;
 
 public class Matrix {
     private int mColumns;
@@ -379,6 +369,16 @@ public class Matrix {
         return matrix(values, 0, values.length);
     }
     
+    public static Matrix matrix(Matrix x) {
+        Matrix result = Matrix.zeros(x.getRows(), x.getColumns());
+        
+        for(int i = 0; i < x.mValues.length; i++) {
+            result.mValues[i] = x.mValues[i];
+        }
+        
+        return result;
+    }
+    
     public static Matrix matrix(double[][] values, int startRow, int maxRows) {
         int rows = maxRows;
         int cols = values[0].length;
@@ -413,120 +413,6 @@ public class Matrix {
         }
         
         return m;
-    }
-    
-    public static Matrix loadCommaDelimitedTextFile(File f) throws IOException {
-        return loadDelimitedTextFile(f, ",");
-    }
-    
-    public static Matrix loadDelimitedTextFile(File f, String delimiter) throws IOException {
-        InputStream is = getInputStream(f);
-        InputStreamReader isr = new InputStreamReader(is);
-        BufferedReader br = new BufferedReader(isr);
-
-        int colcount = 0;
-        ArrayList<double[]> rows = new ArrayList<double[]>();
-        for(String val = br.readLine(); val != null; val = br.readLine()) {
-            String[] parts = val.split(delimiter);
-            if (colcount == 0) {
-                colcount = parts.length;
-            }
-            double[] vals = new double[colcount];
-            for (int i = 0; i < vals.length; i++) {
-                vals[i] = Double.parseDouble(parts[i]);
-            }
-            rows.add(vals);
-        }
-        
-        br.close();
-
-        double[][] rawValues = rows.toArray(new double[rows.size()][colcount]);
-        return Matrix.matrix(rawValues);
-    }
-    
-    public static Matrix loadMNISTLabelData(File f, int start, int count) throws IOException {
-        InputStream is = getInputStream(f);
-        DataInputStream dis = new DataInputStream(is); 
-        
-        try {
-            int magic = dis.readInt();
-            if (magic != 2049) {
-                throw new IOException("IDX-1 file had bad magic number: " + magic);
-            }
-            int items = dis.readInt();
-            
-            int n = 0;
-            Matrix x = Matrix.zeros(count, 1);
-            for(int i = 0; i < items; i++) {
-                if (i < start) {
-                    continue;
-                }
-                
-                int data = dis.readByte();
-                x.setValue(n, 0, data);
-                
-                n++;
-                if (n >= count) {
-                    break;
-                }
-            }
-            
-            return x;
-        } finally {
-            dis.close();
-        }
-    }
-    
-    public static Matrix loadMNISTPixelData(File f, int start, int count) throws IOException {
-        InputStream is = getInputStream(f);
-        DataInputStream dis = new DataInputStream(is); 
-        
-        try {
-            int magic = dis.readInt();
-            if (magic != 2051) {
-                throw new IOException("IDX-3 file had bad magic number: " + magic);
-            }
-            
-            int items = dis.readInt();
-            int rows = dis.readInt();
-            int columns = dis.readInt();
-            Matrix m = Matrix.zeros(count, rows * columns);
-            int n = 0;
-            for(int i = 0; i < items; i++) {
-                for(int x = 0; x < columns; x++) {
-                    for(int y = 0; y < rows; y++) {
-                        int data = dis.readByte();
-                        if (i < start) {
-                            continue;
-                        }
-
-                        if (n >= count) {
-                            break;
-                        }
-
-                        m.setValue(n, y * columns + x, data);
-                        n++;
-                    }
-                }
-            }
-            
-            return m;
-        } finally {
-            dis.close();
-        }
-    }
-    
-    private static InputStream getInputStream(File file) throws IOException {
-        String filename = file.getAbsolutePath();
-        
-        InputStream inputStream = new FileInputStream(file);
-        if (filename.endsWith(".zip")) {
-            inputStream = new ZipInputStream(inputStream);
-        } else if (filename.endsWith(".gz")) {
-            inputStream = new GZIPInputStream(inputStream);
-        }
-        
-        return inputStream;
     }
     
     private static void copyRegion(Matrix src, int srcColumn, int srcRow, Matrix target, int targetColumn, int targetRow, int columns, int rows) {
