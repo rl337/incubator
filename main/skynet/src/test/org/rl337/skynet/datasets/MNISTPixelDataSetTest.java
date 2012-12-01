@@ -12,6 +12,7 @@ public class MNISTPixelDataSetTest extends TestCase {
 
         Matrix m;
         int read = 0;
+        // This ds should have 60k entries and the values should all be between 0 and 255.
         while( (m = ds.getNextBatch(1)) != null) {
             assertEquals("MNIST pixel data should be 784 columns", 784, m.getColumns());
             assertEquals("This batch should be 1 row", 1, m.getRows());
@@ -28,7 +29,7 @@ public class MNISTPixelDataSetTest extends TestCase {
     public void testValidation10kSetPixels() throws Exception {
         MNISTPixelDataSet ds = new MNISTPixelDataSet(new File("data/t10k-images-idx3-ubyte.gz"));
 
-        // This ds should have 60k entries and the values should all be between 0 and 9.
+        // This ds should have 10k entries and the values should all be between 0 and 255.
         Matrix m;
         int read = 0;
         while( (m = ds.getNextBatch(1000)) != null) {

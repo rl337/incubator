@@ -27,7 +27,7 @@ public class MNISTLabelDataSetTest extends TestCase {
     public void testValidation10kSetLabels() throws Exception {
         MNISTLabelDataSet ds = new MNISTLabelDataSet(new File("data/t10k-labels-idx1-ubyte.gz"));
 
-        // This ds should have 60k entries and the values should all be between 0 and 9.
+        // This ds should have 10k entries and the values should all be between 0 and 9.
         Matrix m;
         int read = 0;
         while( (m = ds.getNextBatch(1000)) != null) {

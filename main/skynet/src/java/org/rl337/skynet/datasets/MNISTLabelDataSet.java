@@ -11,7 +11,7 @@ public class MNISTLabelDataSet extends AbstractFileDataSet {
     
     private int mLastRow;
 
-    protected MNISTLabelDataSet(File f) throws IOException {
+    public MNISTLabelDataSet(File f) throws IOException {
         super(f);
         mLastRow = 0;
     }
