@@ -11,7 +11,7 @@ public class DelimitedTextFileDataSet extends AbstractFileDataSet {
     private String mDelimiter;
     private int mColumnCount;
 
-    protected DelimitedTextFileDataSet(File f, String delimiter) throws IOException {
+    public DelimitedTextFileDataSet(File f, String delimiter) throws IOException {
         super(f);
         mDelimiter = delimiter;
         mColumnCount = 0;
