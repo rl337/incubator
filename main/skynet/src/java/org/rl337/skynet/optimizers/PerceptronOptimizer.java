@@ -1,18 +1,16 @@
 package org.rl337.skynet.optimizers;
 
 import org.rl337.skynet.Hypothesis;
-import org.rl337.skynet.Optimizer;
 import org.rl337.skynet.types.Matrix;
 
-public class PerceptronOptimizer extends Optimizer {
+public class PerceptronOptimizer extends AbstractBatchOptimizer {
 
-    public PerceptronOptimizer() {
-        super(Hypothesis.Perceptron, null);
+    public PerceptronOptimizer(int batchSize) {
+        super(Hypothesis.Perceptron, null, batchSize);
     }
 
     @Override
-    public Matrix run(Matrix theta, Matrix x, Matrix y) {
-        
+    public Matrix runBatch(Matrix theta, Matrix x, Matrix y) {
         Matrix guess = getHypothesis().guess(theta, x);
         for (int j = 0; j < guess.getRows(); j++) {
             double actualRaw = guess.getValue(j, 0);
@@ -31,7 +29,7 @@ public class PerceptronOptimizer extends Optimizer {
             }
         }
         
-        return null;
+        return theta;
     }
 
 }
