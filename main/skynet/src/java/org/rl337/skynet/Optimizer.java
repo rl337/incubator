@@ -13,7 +13,7 @@ public abstract class Optimizer {
         mCostFunction = c;
     }
     
-    public abstract Matrix run(Matrix theta, Matrix x, Matrix y);
+    public abstract Matrix run(Matrix initialTheta, DataSet trainingData, DataSet labelData);
 
     public Hypothesis getHypothesis() {
         return mHypothesis;

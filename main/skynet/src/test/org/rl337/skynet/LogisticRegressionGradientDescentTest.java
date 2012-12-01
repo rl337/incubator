@@ -3,6 +3,7 @@ package org.rl337.skynet;
 import junit.framework.TestCase;
 
 import org.rl337.skynet.costfunctions.LogisticRegressionCostFunction;
+import org.rl337.skynet.datasets.MatrixDataSet;
 import org.rl337.skynet.optimizers.GradientDescentOptimizer;
 import org.rl337.skynet.types.Matrix;
 
@@ -15,8 +16,8 @@ public class LogisticRegressionGradientDescentTest extends TestCase {
         GradientDescentOptimizer optimizer = new GradientDescentOptimizer(alpha, Hypothesis.LogisticRegression, c, iterations, 0);
         Matrix theta = optimizer.run(
             Matrix.zeros(3,1), 
-            x1,
-            y
+            new MatrixDataSet(x1),
+            new MatrixDataSet(y)
         );
         
         return Hypothesis.LogisticRegression.guess(theta, x1);
@@ -50,7 +51,7 @@ public class LogisticRegressionGradientDescentTest extends TestCase {
         Matrix x = testData.sliceColumns(0, 1);
         Matrix y = testData.sliceColumn(2);
         
-        Matrix h = runLogisticRegression(x, y, 10000, 0.01);
+        Matrix h = runLogisticRegression(x, y, 15000, 0.0003125);
         
         int wrong = 0;
         for (int i = 0; i < y.getRows(); i++) {

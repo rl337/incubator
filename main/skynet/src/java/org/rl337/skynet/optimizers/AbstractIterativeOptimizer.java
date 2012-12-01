@@ -1,6 +1,7 @@
 package org.rl337.skynet.optimizers;
 
 import org.rl337.skynet.CostFunction;
+import org.rl337.skynet.DataSet;
 import org.rl337.skynet.Hypothesis;
 import org.rl337.skynet.Optimizer;
 import org.rl337.skynet.types.Matrix;
@@ -29,7 +30,7 @@ public abstract class AbstractIterativeOptimizer extends Optimizer {
     }
 
     @Override
-    public Matrix run(Matrix theta, Matrix x, Matrix y) {
+    public Matrix run(Matrix initialTheta, DataSet training, DataSet labels) {
         Hypothesis h = getHypothesis();
         CostFunction c = getCostFunction();
         double lastScore = 0;
@@ -40,8 +41,10 @@ public abstract class AbstractIterativeOptimizer extends Optimizer {
         }
         
         double epsilon = getEpsilon();
+        Matrix x = training.getAll();
+        Matrix y = labels.getAll();
         
-        Matrix result = theta;
+        Matrix result = initialTheta;
         int debugSize = 0;
         for(int i = 0; i < mIterations; i++) {
             // Calculates Gradient

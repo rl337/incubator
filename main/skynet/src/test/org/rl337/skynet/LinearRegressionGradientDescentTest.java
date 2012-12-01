@@ -1,6 +1,7 @@
 package org.rl337.skynet;
 
 import org.rl337.skynet.costfunctions.DifferenceSquareCostFunction;
+import org.rl337.skynet.datasets.MatrixDataSet;
 import org.rl337.skynet.optimizers.GradientDescentOptimizer;
 import org.rl337.skynet.types.Matrix;
 import junit.framework.TestCase;
@@ -15,8 +16,8 @@ public class LinearRegressionGradientDescentTest extends TestCase {
         GradientDescentOptimizer optimizer = new GradientDescentOptimizer(alpha, Hypothesis.LinearRegression, c, iterations, 0.0);
         Matrix theta = optimizer.run(
             Matrix.zeros(2,1), 
-            x1,
-            y
+            new MatrixDataSet(x1),
+            new MatrixDataSet(y)
         );
         
         return theta;
