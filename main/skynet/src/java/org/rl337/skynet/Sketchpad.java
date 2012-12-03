@@ -371,7 +371,7 @@ public class Sketchpad {
                             throw new IllegalArgumentException("bitmap values must be between 0 and 1");
                         }
                         
-                        int colorIndex = (int) (val * 256);
+                        int colorIndex = (int) (val * 255);
                         g.setColor(sm256Monochrome[colorIndex]);
                         g.drawRect(xoffset + x, yoffset + y, 1, 1);
                     }
