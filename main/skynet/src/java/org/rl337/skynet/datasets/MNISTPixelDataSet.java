@@ -13,9 +13,13 @@ public class MNISTPixelDataSet extends AbstractFileDataSet {
     
     private int mLastRow;
 
-    public MNISTPixelDataSet(File f) throws IOException {
-        super(f);
+    public MNISTPixelDataSet(File f, boolean addBias) throws IOException {
+        super(f, addBias);
         mLastRow = 0;
+    }
+    
+    public MNISTPixelDataSet(File f) throws IOException {
+        this(f, false);
     }
     
 

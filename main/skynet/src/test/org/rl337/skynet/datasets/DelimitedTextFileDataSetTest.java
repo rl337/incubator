@@ -73,6 +73,25 @@ public class DelimitedTextFileDataSetTest extends TestCase {
         assertMatrix(batch3, new double[][]{{23, 25, 29}});
     }
     
+    public void testMixedGetsWithBias() throws Exception {
+        
+        double[][] mv = new double[][] {
+            {9, 8, 7},
+            {1, 3, 5},
+            {23, 25, 29}
+        };
+        
+        
+        File f = createTestDataSet(mv, ",");
+        DelimitedTextFileDataSet ds = new DelimitedTextFileDataSet(f, ",", true);
+        
+        Matrix batch1 = ds.getNextBatch(2);
+        assertMatrix(batch1, new double[][]{{1, 9, 8, 7}, {1, 1, 3, 5}});
+        
+        Matrix batch3 = ds.getAll();
+        assertMatrix(batch3, new double[][]{{1, 23, 25, 29}});
+    }
+    
     public File createTestDataSet(double[][] values, String delimiter) throws Exception {
         File file = File.createTempFile(getClass().getSimpleName(), ".test");
         
@@ -95,6 +114,8 @@ public class DelimitedTextFileDataSetTest extends TestCase {
         
         return file;
     }
+    
+    
     
     
     public void assertMatrix(Matrix m, double[][] values) {

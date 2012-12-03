@@ -11,10 +11,14 @@ public class DelimitedTextFileDataSet extends AbstractFileDataSet {
     private String mDelimiter;
     private int mColumnCount;
 
-    public DelimitedTextFileDataSet(File f, String delimiter) throws IOException {
-        super(f);
+    public DelimitedTextFileDataSet(File f, String delimiter, boolean addBias) throws IOException {
+        super(f, addBias);
         mDelimiter = delimiter;
         mColumnCount = 0;
+    }
+    
+    public DelimitedTextFileDataSet(File f, String delimiter) throws IOException {
+        this(f, delimiter, false);
     }
     
     @Override

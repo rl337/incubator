@@ -16,10 +16,16 @@ import org.rl337.skynet.types.Matrix;
 public abstract class AbstractFileDataSet implements DataSet {
     private DataInputStream mInput;
     private boolean mEOF;
+    private boolean mAddBias;
     
-    protected AbstractFileDataSet(File f) throws IOException {
+    protected AbstractFileDataSet(File f, boolean addBias) throws IOException {
         mInput = getInputStream(f);
         mEOF = false;
+        mAddBias = addBias;
+    }
+    
+    protected AbstractFileDataSet(File f) throws IOException {
+        this(f, false);
     }
     
     private DataInputStream getInputStream(File file) throws IOException {
@@ -45,7 +51,13 @@ public abstract class AbstractFileDataSet implements DataSet {
 
     public Matrix getNextBatch(int size) {
         try {
-            return readNextBatch(mInput, size);
+            Matrix data = readNextBatch(mInput, size);
+            if (mAddBias) {
+                Matrix bias = Matrix.ones(data.getRows(), 1);
+                data = bias.appendColumns(data);
+            }
+            
+            return data;
         } catch (IOException e) {
             close();
             return null;
@@ -54,7 +66,13 @@ public abstract class AbstractFileDataSet implements DataSet {
 
     public Matrix getAll() {
         try {
-            return readAll(mInput);
+            Matrix data = readAll(mInput);
+            if (mAddBias) {
+                Matrix bias = Matrix.ones(data.getRows(), 1);
+                data = bias.appendColumns(data);
+            }
+            
+            return data;
         } catch (EOFException e) {
             mEOF = true;
             return null;
