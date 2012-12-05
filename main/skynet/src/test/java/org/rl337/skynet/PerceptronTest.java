@@ -59,7 +59,7 @@ public class PerceptronTest extends TestCase {
         
         double percentCorrect = (double) correct.sum() / correct.getRows() * 100;
         
-        System.out.println(percentCorrect);
+        //System.out.println(percentCorrect);
         assertTrue("We're expecting a success rate of at least 80%. Actual: " + percentCorrect, percentCorrect > 80.0);
         
 //        Sketchpad pad = new Sketchpad("Perceptron", "Perceptron Weights", 1024, 1024);
