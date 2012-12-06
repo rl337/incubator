@@ -12,7 +12,7 @@ public class LogisticRegressionGradientDescentTest extends TestCase {
     public Matrix runLogisticRegression(Matrix x, Matrix y, int iterations, double alpha) {
         
         Matrix x1 = Matrix.ones(x.getRows(), 1).appendColumns(x);
-        CostFunction c = new LogisticRegressionCostFunction(1.0);
+        GradientCostFunction c = new LogisticRegressionCostFunction(1.0);
         GradientDescentOptimizer optimizer = new GradientDescentOptimizer(alpha, Hypothesis.LogisticRegression, c, iterations, 0);
         Matrix theta = optimizer.run(
             Matrix.zeros(3,1), 

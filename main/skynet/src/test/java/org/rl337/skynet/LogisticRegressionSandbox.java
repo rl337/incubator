@@ -16,7 +16,7 @@ public class LogisticRegressionSandbox {
         Sketchpad pad = new Sketchpad("Logistic Regression Sandbox", "Cost over Iterations", 640, 640);
 
         Matrix optimalTheta = Matrix.zeros(785, 1); // 28 x 28 pixels + bias
-        CostFunction c = new LogisticRegressionCostFunction(0.1);
+        GradientCostFunction c = new LogisticRegressionCostFunction(0.1);
         GradientDescentOptimizer optimizer = new GradientDescentOptimizer(0.01, Hypothesis.LogisticRegression, c, 10000, 1.0E-30, true);
 
         DataSet training = new MNISTPixelDataSet(new File("data/train-images-idx3-ubyte.gz"));

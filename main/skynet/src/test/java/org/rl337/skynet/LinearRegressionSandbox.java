@@ -26,7 +26,7 @@ public class LinearRegressionSandbox {
         Sketchpad pad = new Sketchpad("test plot", scatterPlotName, 640, 640);
         pad.plotScatterChart(scatterPlotName, Shape.Circle, x, y);
         
-        CostFunction c = new DifferenceSquareCostFunction(1.0);
+        GradientCostFunction c = new DifferenceSquareCostFunction(1.0);
         
         //Matrix x1 = Matrix.ones(x.getRows(), 1).appendColumns(x);
         GradientDescentOptimizer optimizer = new GradientDescentOptimizer(0.0025, Hypothesis.LinearRegression, c, 40000, 0, true);
