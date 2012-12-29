@@ -1,7 +1,7 @@
 package org.rl337.skynet.optimizers;
 
-import org.rl337.skynet.CostFunction;
 import org.rl337.skynet.DataSet;
+import org.rl337.skynet.GradientCostFunction;
 import org.rl337.skynet.Hypothesis;
 import org.rl337.skynet.Optimizer;
 import org.rl337.skynet.types.Matrix;
@@ -14,7 +14,7 @@ public abstract class AbstractIterativeOptimizer extends Optimizer {
     private boolean mDebug;
     private Matrix mDebugData;
 
-    protected AbstractIterativeOptimizer(Hypothesis h, CostFunction c, int iterations, double epsilon, boolean debug) {
+    protected AbstractIterativeOptimizer(Hypothesis h, GradientCostFunction c, int iterations, double epsilon, boolean debug) {
         super(h, c);
         mIterations = iterations;
         mEpsilon = epsilon;
@@ -32,7 +32,7 @@ public abstract class AbstractIterativeOptimizer extends Optimizer {
     @Override
     public Matrix run(Matrix initialTheta, DataSet training, DataSet labels) {
         Hypothesis h = getHypothesis();
-        CostFunction c = getCostFunction();
+        GradientCostFunction c = (GradientCostFunction) getCostFunction();
         double lastScore = 0;
         double[][] debugValues = null;
         if (mDebug) {

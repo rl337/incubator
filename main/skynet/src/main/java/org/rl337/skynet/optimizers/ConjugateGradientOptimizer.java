@@ -1,12 +1,12 @@
 package org.rl337.skynet.optimizers;
 
-import org.rl337.skynet.CostFunction;
+import org.rl337.skynet.GradientCostFunction;
 import org.rl337.skynet.Hypothesis;
 import org.rl337.skynet.types.Matrix;
 
 public class ConjugateGradientOptimizer extends AbstractIterativeOptimizer {
     
-    protected ConjugateGradientOptimizer(Hypothesis h, CostFunction c, int iterations, double epsilon, boolean debug) {
+    protected ConjugateGradientOptimizer(Hypothesis h, GradientCostFunction c, int iterations, double epsilon, boolean debug) {
         super(h, c, iterations, epsilon, debug);
     }
 
@@ -40,7 +40,6 @@ public class ConjugateGradientOptimizer extends AbstractIterativeOptimizer {
 
     @Override
     public Matrix runIteration(Matrix theta, Matrix gradient) {
-        // TODO Auto-generated method stub
         return null;
     }
 

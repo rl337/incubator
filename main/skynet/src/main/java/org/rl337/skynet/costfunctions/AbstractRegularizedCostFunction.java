@@ -1,8 +1,8 @@
 package org.rl337.skynet.costfunctions;
 
-import org.rl337.skynet.CostFunction;
+import org.rl337.skynet.GradientCostFunction;
 
-public abstract class AbstractRegularizedCostFunction implements CostFunction {
+public abstract class AbstractRegularizedCostFunction implements GradientCostFunction {
     private double mLambda;
     
     public AbstractRegularizedCostFunction(double lambda) {
