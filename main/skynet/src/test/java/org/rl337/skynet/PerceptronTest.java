@@ -50,7 +50,6 @@ public class PerceptronTest extends TestCase {
         Matrix guess = h.guess(theta, validationData);
         Matrix correct = Matrix.elementWiseOperation("Compare", realValidationLabels, guess, new MatrixElementWiseOperation() {
 
-            @Override
             public double operation(int row, int col, double aVal, double bVal) {
                 return aVal == bVal ? 1.0 : 0.0;
             }
