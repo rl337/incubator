@@ -1,6 +1,7 @@
 package org.rl337.skynet.types;
 
-import org.rl337.skynet.types.Matrix.MatrixOperation;
+import org.rl337.math.types.Matrix;
+import org.rl337.math.types.Matrix.MatrixOperation;
 
 public class BinaryThreshold {
 

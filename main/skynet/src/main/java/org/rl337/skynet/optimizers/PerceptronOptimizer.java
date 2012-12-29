@@ -1,7 +1,7 @@
 package org.rl337.skynet.optimizers;
 
 import org.rl337.skynet.Hypothesis;
-import org.rl337.skynet.types.Matrix;
+import org.rl337.math.types.Matrix;
 
 public class PerceptronOptimizer extends AbstractBatchOptimizer {
 

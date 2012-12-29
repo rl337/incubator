@@ -2,10 +2,11 @@ package org.rl337.skynet;
 
 import java.io.File;
 
-import org.rl337.skynet.Sketchpad.Shape;
+import org.rl337.math.Sketchpad;
+import org.rl337.math.Sketchpad.Shape;
 import org.rl337.skynet.datasets.DelimitedTextFileDataSet;
 import org.rl337.skynet.types.Log;
-import org.rl337.skynet.types.Matrix;
+import org.rl337.math.types.Matrix;
 
 public class PlotSubsamples {
     public static void main(String[] args) throws Exception {

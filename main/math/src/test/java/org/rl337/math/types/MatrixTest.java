@@ -1,10 +1,9 @@
-package org.rl337.skynet.types;
+package org.rl337.math.types;
 
 import java.util.Random;
 
-import org.rl337.skynet.types.Matrix;
-
 import junit.framework.TestCase;
+
 
 public class MatrixTest extends TestCase {
 

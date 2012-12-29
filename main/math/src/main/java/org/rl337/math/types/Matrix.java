@@ -1,6 +1,7 @@
-package org.rl337.skynet.types;
+package org.rl337.math.types;
 
 import java.util.Random;
+
 
 public class Matrix {
     private int mColumns;

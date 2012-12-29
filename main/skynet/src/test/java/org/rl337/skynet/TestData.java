@@ -1,7 +1,7 @@
 package org.rl337.skynet;
 
-import org.rl337.skynet.types.Matrix;
-import org.rl337.skynet.types.Matrix.MatrixOperation;
+import org.rl337.math.types.Matrix;
+import org.rl337.math.types.Matrix.MatrixOperation;
 
 public class TestData {
     public static Matrix testMatrixLinear(final double intercept, final double slope, final double variance, int count) {

@@ -1,11 +1,12 @@
 package org.rl337.skynet;
 
-import org.rl337.skynet.Sketchpad.Shape;
+import org.rl337.math.Sketchpad;
+import org.rl337.math.Sketchpad.Shape;
 import org.rl337.skynet.costfunctions.DifferenceSquareCostFunction;
 import org.rl337.skynet.datasets.MatrixDataSet;
 import org.rl337.skynet.optimizers.GradientDescentOptimizer;
 import org.rl337.skynet.types.Log;
-import org.rl337.skynet.types.Matrix;
+import org.rl337.math.types.Matrix;
 
 public class LinearRegressionSandbox {
 

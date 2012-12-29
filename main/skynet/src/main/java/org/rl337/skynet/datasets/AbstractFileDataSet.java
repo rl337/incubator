@@ -11,7 +11,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipInputStream;
 
 import org.rl337.skynet.DataSet;
-import org.rl337.skynet.types.Matrix;
+import org.rl337.math.types.Matrix;
 
 public abstract class AbstractFileDataSet implements DataSet {
     private DataInputStream mInput;

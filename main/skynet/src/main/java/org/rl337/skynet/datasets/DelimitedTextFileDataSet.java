@@ -5,7 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import org.rl337.skynet.types.Matrix;
+import org.rl337.math.types.Matrix;
 
 public class DelimitedTextFileDataSet extends AbstractFileDataSet {
     private String mDelimiter;
