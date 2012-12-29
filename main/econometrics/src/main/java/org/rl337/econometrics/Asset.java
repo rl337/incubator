@@ -73,12 +73,14 @@ public class Asset {
     
     public double getContinuouslyCompoundedAnnualizedGrossRate(Period start, Period stop) {
         
-        Period effectivePeriod = stop.delta(start);
-        
-        double compoundings = Period.PERIOD_ANNUALLY.count(effectivePeriod);
-        double netRate = getContinuallyCompoundedNetRate(start, stop);
-        double grossReturn = 1 + netRate;
-        
-        return Math.pow(grossReturn, compoundings);
+//        Period effectivePeriod = stop.delta(start);
+//        
+//        double compoundings = Period.PERIOD_ANNUALLY.count(effectivePeriod);
+//        double netRate = getContinuallyCompoundedNetRate(start, stop);
+//        double grossReturn = 1 + netRate;
+//        
+//        return Math.pow(grossReturn, compoundings);
+        double grossReturn = getAnnualizedGrossRate(start, stop);
+        return Math.log(grossReturn);
     }
 }
