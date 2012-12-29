@@ -9,12 +9,12 @@ public class CompoundedInterest extends AbstractInterest {
     }
     
     public double value(Period time) {
-        double basePeriod = getPeriod().count(Period.PERIOD_ANNUALLY);
+        double basePeriod = Period.PERIOD_ANNUALLY.count(getPeriod());
         return getPrincipal() * Math.pow(1 + getRate() / basePeriod, getRawPeriods(time));
     }
 
     public double getEffectiveAnnualRate() {
-        double basePeriod = getPeriod().count(Period.PERIOD_ANNUALLY);
+        double basePeriod = Period.PERIOD_ANNUALLY.count(getPeriod());
         return Math.pow(1 + getRate() / basePeriod, basePeriod) - 1;
     }
 

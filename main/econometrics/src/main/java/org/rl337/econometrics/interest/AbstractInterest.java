@@ -27,6 +27,6 @@ public abstract class AbstractInterest implements Interest {
     }
     
     protected double getRawPeriods(Period time) {
-        return mPeriod.count(time);
+        return time.count(mPeriod);
     }
 }
