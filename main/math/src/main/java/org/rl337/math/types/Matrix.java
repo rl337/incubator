@@ -2,13 +2,68 @@ package org.rl337.math.types;
 
 import java.util.Random;
 
-
+/**
+ * The Matrix class is a wrapper around an array with convenience methods which
+ * simulate a 2-dimensional space.  The point of this class is to provide an 
+ * easy way to simulate, in java, a lot of the functionality you might find
+ * in Math packages like r and octave.
+ * 
+ * This implementation was not designed to be particularly efficient.  Almost all
+ * operations which return a Matrix object will return a new instance rather than
+ * re-use the existing object.
+ * 
+ * The constructor for Matrix is private on purpose. This requires you to code using
+ * the various static methods which have much better descriptions of the type of matrix
+ * they return.  For example:
+ * 
+ * Matrix.identity(int n) returns an nxn matrix with 1s along the diagonal.
+ * 
+ * There are two sub-interfaces of Matrix which define how to do arbitrary binary element-wise
+ * operations as well as unary matrix transforms.
+ * 
+ * For unary operations, use the MatrixOperation interface
+ * This code multiplies all elements of a random matrix by 3
+ * 
+ *   Matrix m = Matrix.random(3, 3);
+ *   Matrix newMatrix = Matrix.matrixOperation(m, new MatrixOperation() {
+ *      public double operation(int row, int col, double val) {
+ *          return val * 3;
+ *      }
+ *   });
+ *   
+ * For binary element-wise operations use the MatrixElementWiseOperation.  This code does
+ * returns the matrix with the element-wise max of two random matrices.
+ * 
+ *   Matrix a = Matrix.random(3, 3);
+ *   Matrix b = Matrix.random(3, 3);
+ *   Matrix newMatrix = Matrix.elementWiseOperation("max", a, b,
+ *      new MatrixElementWiseOperation() {
+ *          public double operation(int row, int col, double aVal, double bVal) {
+ *              if (aVal > bVal) return aVal;
+ *              return bVal;
+ *          }
+ *      }
+ *  );
+ *  
+ *  Here, the operation name helps with debugging.  If some matrix size assertion fails,
+ *  you'll not only be given the resulting exception stacktrace, but the actual operation
+ *  that failed.
+ * 
+ * @author Richard Lee
+ */
 public class Matrix {
     private int mColumns;
     private int mRows;
     
     private double[] mValues;
     
+    /**
+     * Basic matrix constructor.  Access to this method is purposely restricted to 
+     * require users to choose more descriptive construction methods below.
+     * 
+     * @param rows number of rows of the matrix
+     * @param columns number of columns each row contains
+     */
     private Matrix(int rows, int columns) {
         mColumns = rows;
         mRows = columns;
@@ -16,9 +71,32 @@ public class Matrix {
         mValues = new double[rows * columns];
     }
     
+    /**
+     * Returns the number of columns of this Matrix.
+     * @return the number of columns as an integer
+     */
     public int getColumns() { return mColumns; }
+    
+    /**
+     * Return the number of rows of this Matrix
+     * @return the number of rows as an integer
+     */
     public int getRows() { return mRows; }
     
+    /**
+     * Returns a formatted string value of the contents of this matrix.
+     * The output is comma separated for columns and newline delimited
+     * for rows.  For example, a 3x3 identity matrix would result in
+     * the following string:
+     * 
+     * <pre>
+     * 1.0,0.0,1.0
+     * 0.0,1.0,0.0
+     * 0.0,0.0,1.0
+     * </pre>
+     * 
+     * @return A comma delimited representation of the matrix contents
+     */
     public String toString() {
         
         StringBuilder builder = new StringBuilder();
@@ -34,6 +112,16 @@ public class Matrix {
         return builder.toString();
     }
     
+    /**
+     * Returns a human readable string describing the size of the matrix.
+     * A 3x5 matrix will return the following:
+     * 
+     * <code>
+     * 3 rows(s) x 5 column(s)
+     * </code>
+     * 
+     * @return a string describing the dimensions of the matrix
+     */
     public String toDimensionString() {
         StringBuilder builder = new StringBuilder();
         builder.append(mRows).append(" row(s) x ").append(mColumns).append(" column(s)");
@@ -41,6 +129,11 @@ public class Matrix {
         return builder.toString();
     }
     
+    /**
+     * This creates a new matrix whose contents is the transpose of this matrix.
+     * A transpose is simply the rows and columns reversed
+     * @return A matrix representing the transpose of this matrix
+     */
     public Matrix transpose() {
         Matrix m = zeros(mColumns, mRows);
         for(int i = 0; i < mColumns; i++) {
@@ -52,6 +145,14 @@ public class Matrix {
         return m;
     }
     
+    /**
+     * This creates a matrix object that is the Matrix Product of this matrix
+     * and the matrix specified by m.  Specifically, if this matrix is A and
+     * matrix passed as m is B, this returns A x B.
+     * 
+     * @param m the matrix to multiply by
+     * @return A matrix representing the matrix product of this x m
+     */
     public Matrix multiply(Matrix m) {
         if (mColumns != m.mRows) {
             throw new IllegalArgumentException("Tried to multiply " + toDimensionString() + " by " + m.toDimensionString());
@@ -64,8 +165,8 @@ public class Matrix {
                 for(int k = 0; k < mColumns; k++){
                     double a = getValue(i, k);
                     double b = m.getValue(k, j);
-                    // Java thinks that -Inf * 0 is NaN, so if either are 0, add 0.
-                    if (a == 0 || b == 0.0) {
+                    // Java thinks that -Inf * 0 is NaN, so if either are 0, use 0.
+                    if (a == 0.0 || b == 0.0) {
                         continue;
                     }
                     
@@ -78,6 +179,12 @@ public class Matrix {
         return newM;
     }
     
+    /**
+     * This creates a matrix whose elements are the value of the current
+     * Matrix's elements multiplied by the scalar value s.
+     * @param s the value to multiply this matrix's elements by
+     * @return a matrix with values equal to this matrix's values scaled by s.
+     */
     public Matrix multiply(final double s) {
         return matrixOperation(this, new MatrixOperation() {
             public double operation(int row, int col, double val) {
@@ -90,6 +197,12 @@ public class Matrix {
         });
     }
     
+    /**
+     * This creates a matrix whose elements are the value of the current
+     * Matrix's elements divided by some scalar value s. 
+     * @param s the value to divide this matrix's elements by
+     * @return a matrix with values equal to this matrix's values normalized by s
+     */
     public Matrix divide(final double s) {
         return matrixOperation(this, new MatrixOperation() {
             public double operation(int row, int col, double val) {
@@ -101,6 +214,14 @@ public class Matrix {
         });
     }
     
+    /**
+     * This creates a matrix whose elements are the element-wise sum of this
+     * matrix and matrix m.  Note that this matrix and matrix m must be the
+     * same size.
+     * 
+     * @param m the matrix to add this matrix to.
+     * @return A matrix that is the sum of this matrix and m
+     */
     public Matrix add(Matrix m) {
         return elementWiseOperation("add", this, m,
             new MatrixElementWiseOperation() {
@@ -111,6 +232,16 @@ public class Matrix {
         );
     }
     
+    /**
+     * This creates a matrix whose elements are the element-wise difference of this
+     * matrix and matrix m.  Note that this matrix and matrix m must be the
+     * same size.
+     * 
+     * Specifically this calculates: this - m
+     * 
+     * @param m the matrix to subtract from this matrix to.
+     * @return A matrix that is the difference of this matrix and m
+     */
     public Matrix subtract(Matrix m) {
         return elementWiseOperation("subtract", this, m,
             new MatrixElementWiseOperation() {
@@ -326,10 +457,23 @@ public class Matrix {
         return new Stats(mean, stddev, variance, max, min);
     }
     
+    /**
+     * Returns a matrix of zeros.
+     * @param rows number of rows
+     * @param columns number of columns
+     * @return A matrix of zeros whose size is rows x columns
+     */
     public static Matrix zeros(int rows, int columns) {
         return new Matrix(columns, rows);
     }
     
+    /**
+     * Returns a matrix of a specific value.
+     * @param rows number of rows
+     * @param columns number of columns
+     * @param value the value to fill the matrix with
+     * @return A matrix of some value whose size is rows x columns
+     */
     public static Matrix matrix(int rows, int cols, double value) {
 
         Matrix m = zeros(rows, cols);
@@ -343,6 +487,12 @@ public class Matrix {
         return m;
     }
     
+    /**
+     * Returns a matrix of ones.
+     * @param rows number of rows
+     * @param columns number of columns
+     * @return A matrix of ones whose size is rows x columns
+     */
     public static Matrix ones(int rows, int cols) {
         return matrix(rows, cols, 1.0);
     }
