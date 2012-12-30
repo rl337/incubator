@@ -39,5 +39,7 @@ public class UniformDistributionTest extends TestCase {
         assertEquals("q third", 100.0 / 3 - 50, d.q(1.0 / 3), 0.000001);
         assertEquals("q half", 50 - 50, d.q(0.5), 0.000001);
         assertEquals("q one", 100 - 50, d.q(1.0), 0.000001);
+        
+        assertEquals("half of the area should be 50% of prob", 0.5, d.pr(-25.0, 25.0));
     }
 }

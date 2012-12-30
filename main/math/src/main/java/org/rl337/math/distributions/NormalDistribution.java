@@ -1,8 +1,7 @@
 package org.rl337.math.distributions;
 
-import org.rl337.math.Distribution;
 
-public class NormalDistribution implements Distribution {
+public class NormalDistribution extends AbstractDistribution {
     private static final double smSqrt2 = Math.sqrt(2);
     
     public static final NormalDistribution STANDARD = new NormalDistribution(0.0, 1.0);

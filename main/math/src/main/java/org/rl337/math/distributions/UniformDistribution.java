@@ -10,7 +10,7 @@ import org.rl337.math.Distribution;
  * @author Richard Lee
  *
  */
-public class UniformDistribution implements Distribution {
+public class UniformDistribution extends AbstractDistribution {
     private double mR1;
     private double mR2;
     private double mDelta;

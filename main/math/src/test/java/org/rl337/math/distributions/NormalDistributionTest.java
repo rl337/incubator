@@ -50,6 +50,11 @@ public class NormalDistributionTest extends TestCase {
         
         assertEquals("q(0.001349898, 0.5, 0.5)", -1, d.q(0.001349898), smQMaxDoubleDelta);
         assertEquals("q(2.866516e-07, 0.5, 0.5)", -2, d.q(2.866516e-07), smQMaxDoubleDelta);
+        
+        assertEquals("one std out should be 0.6826895", 0.6826895, d.pr(0.0, 1.0), smPrMaxDoubleDelta);
+        assertEquals("two std out should be 0.9544997", 0.9544997, d.pr(-0.5, 1.5), smPrMaxDoubleDelta);
+        assertEquals("two std out should be 0.9973002", 0.9973002, d.pr(-1.0, 2), smPrMaxDoubleDelta);
+        
     }
 
 }
