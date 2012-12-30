@@ -43,6 +43,13 @@ public class NormalDistributionTest extends TestCase {
         assertEquals("pr(-1, 0.5, 0.5)", 0.001349898, d.pr(-1.0), smPrMaxDoubleDelta);
         assertEquals("pr(-2, 0.5, 0.5)", 2.866516e-07, d.pr(-2.0), smPrMaxDoubleDelta);
         assertEquals("pr(-4, 0.5, 0.5)", 0.0, d.pr(-4.0), smPrMaxDoubleDelta);
+        
+        assertEquals("q(0.1586553, 0.5, 0.5)", 0, d.q(0.1586553), smQMaxDoubleDelta);
+        assertEquals("q(0.8413447, 0.5, 0.5)", 1, d.q(0.8413447), smQMaxDoubleDelta);
+        assertEquals("q(0.9986501, 0.5, 0.5)", 2, d.q(0.9986501), smQMaxDoubleDelta);
+        
+        assertEquals("q(0.001349898, 0.5, 0.5)", -1, d.q(0.001349898), smQMaxDoubleDelta);
+        assertEquals("q(2.866516e-07, 0.5, 0.5)", -2, d.q(2.866516e-07), smQMaxDoubleDelta);
     }
 
 }

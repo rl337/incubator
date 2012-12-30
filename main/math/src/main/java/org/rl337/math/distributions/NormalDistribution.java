@@ -31,7 +31,7 @@ public class NormalDistribution implements Distribution {
     }
 
     public double q(double prob) {
-        return smSqrt2 * erfinv(2 * prob - 1);
+        return mMu + mSigma * smSqrt2 * erfinv(2 * prob - 1);
     }
     
     private static final double p = 0.3275911;
