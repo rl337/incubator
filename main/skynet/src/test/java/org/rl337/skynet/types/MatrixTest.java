@@ -407,4 +407,23 @@ public class MatrixTest extends TestCase {
         
     }
     
+    public void testRepeatColumns() {
+        double[][] avals = new double[][] {
+            {1, 2, 3},
+            {1, 2, 3},
+            {3, 4, 5},
+        };
+        
+        Matrix m1 = Matrix.matrix(avals);
+        Matrix m2 = m1.repeatColumn(1, 3);
+        
+        double[][] bvals = new double[][] {
+                {2, 2, 2},
+                {2, 2, 2},
+                {4, 4, 4},
+        };
+        
+        assertMatrix(m2, bvals);
+    }
+    
 }

@@ -325,6 +325,20 @@ public class Matrix {
         return new Stats(mean, stddev, variance, max, min);
     }
     
+    
+    public Matrix repeatColumn(int srcCol, int n) {
+        int rows = getRows();
+        Matrix m = zeros(rows, n);
+        for(int y = 0; y < rows; y++) {
+            double value = getValue(y, srcCol);
+            for(int x = 0; x < n; x++) {
+                m.setValue(y, x, value);
+            }
+        }
+        
+        return m;
+    }
+    
     public static Matrix zeros(int rows, int columns) {
         return new Matrix(columns, rows);
     }

@@ -1,8 +1,9 @@
 package org.rl337.skynet.types;
 
+import org.rl337.skynet.ActivationFunction;
 import org.rl337.skynet.types.Matrix.MatrixOperation;
 
-public class BinaryThreshold {
+public class BinaryThreshold implements ActivationFunction {
 
     public Matrix evaluate(Matrix m) {
         return Matrix.matrixOperation(m, new MatrixOperation() {

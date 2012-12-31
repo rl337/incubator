@@ -1,6 +1,8 @@
 package org.rl337.skynet.types;
 
-public class Sigmoid {
+import org.rl337.skynet.ActivationFunction;
+
+public class Sigmoid implements ActivationFunction {
     private Matrix.MatrixOperation mSigmoidFunction;
     
     private Sigmoid(Matrix.MatrixOperation function) {
