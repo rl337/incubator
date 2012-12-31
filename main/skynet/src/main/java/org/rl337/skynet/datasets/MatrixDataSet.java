@@ -1,7 +1,7 @@
 package org.rl337.skynet.datasets;
 
 import org.rl337.skynet.DataSet;
-import org.rl337.skynet.types.Matrix;
+import org.rl337.math.types.Matrix;
 
 public class MatrixDataSet implements DataSet {
         private Matrix mMatrix;

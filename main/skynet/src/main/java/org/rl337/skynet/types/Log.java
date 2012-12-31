@@ -1,5 +1,7 @@
 package org.rl337.skynet.types;
 
+import org.rl337.math.types.Matrix;
+
 
 public class Log {
         private Matrix.MatrixOperation mLogFunction;

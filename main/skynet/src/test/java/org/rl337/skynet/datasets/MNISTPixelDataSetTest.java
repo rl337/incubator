@@ -2,7 +2,7 @@ package org.rl337.skynet.datasets;
 
 import java.io.File;
 
-import org.rl337.skynet.types.Matrix;
+import org.rl337.math.types.Matrix;
 
 import junit.framework.TestCase;
 

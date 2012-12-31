@@ -4,7 +4,7 @@ import org.rl337.skynet.CostFunction;
 import org.rl337.skynet.DataSet;
 import org.rl337.skynet.Hypothesis;
 import org.rl337.skynet.Optimizer;
-import org.rl337.skynet.types.Matrix;
+import org.rl337.math.types.Matrix;
 
 public abstract class AbstractBatchOptimizer extends Optimizer {
     private int mBatchSize;

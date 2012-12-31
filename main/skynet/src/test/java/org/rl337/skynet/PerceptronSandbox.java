@@ -6,8 +6,8 @@ import org.rl337.skynet.datasets.MNISTLabelDataSet;
 import org.rl337.skynet.datasets.MNISTPixelDataSet;
 import org.rl337.skynet.datasets.MatrixDataSet;
 import org.rl337.skynet.optimizers.PerceptronOptimizer;
-import org.rl337.skynet.types.Matrix;
-import org.rl337.skynet.types.Matrix.MatrixOperation;
+import org.rl337.math.types.Matrix;
+import org.rl337.math.types.Matrix.MatrixOperation;
 
 public class PerceptronSandbox {
     public static void main(String[] args) throws Exception {

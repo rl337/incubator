@@ -4,7 +4,7 @@ import java.io.DataInput;
 import java.io.File;
 import java.io.IOException;
 
-import org.rl337.skynet.types.Matrix;
+import org.rl337.math.types.Matrix;
 
 public class MNISTPixelDataSet extends AbstractFileDataSet {
     private int mItems;

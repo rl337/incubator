@@ -2,7 +2,7 @@ package org.rl337.skynet.costfunctions;
 
 import org.rl337.skynet.Hypothesis;
 import org.rl337.skynet.types.Log;
-import org.rl337.skynet.types.Matrix;
+import org.rl337.math.types.Matrix;
 
 public class LogisticRegressionCostFunction extends AbstractRegularizedCostFunction {
 

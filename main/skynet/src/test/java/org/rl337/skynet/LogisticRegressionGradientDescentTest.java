@@ -5,7 +5,7 @@ import junit.framework.TestCase;
 import org.rl337.skynet.costfunctions.LogisticRegressionCostFunction;
 import org.rl337.skynet.datasets.MatrixDataSet;
 import org.rl337.skynet.optimizers.GradientDescentOptimizer;
-import org.rl337.skynet.types.Matrix;
+import org.rl337.math.types.Matrix;
 
 public class LogisticRegressionGradientDescentTest extends TestCase {
     

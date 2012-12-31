@@ -4,7 +4,7 @@ import org.rl337.skynet.DataSet;
 import org.rl337.skynet.GradientCostFunction;
 import org.rl337.skynet.Hypothesis;
 import org.rl337.skynet.Optimizer;
-import org.rl337.skynet.types.Matrix;
+import org.rl337.math.types.Matrix;
 
 public abstract class AbstractIterativeOptimizer extends Optimizer {
     private static final int smDebugSampleSize = 100;

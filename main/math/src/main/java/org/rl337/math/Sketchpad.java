@@ -1,4 +1,4 @@
-package org.rl337.skynet;
+package org.rl337.math;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -16,7 +16,7 @@ import java.util.HashMap;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import org.rl337.skynet.types.Matrix;
+import org.rl337.math.types.Matrix;
 
 
 public class Sketchpad {
@@ -408,5 +408,4 @@ public class Sketchpad {
         Square,
         X
     }
-
 }
