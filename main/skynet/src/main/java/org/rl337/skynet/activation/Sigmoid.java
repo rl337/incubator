@@ -1,4 +1,4 @@
-package org.rl337.skynet.types;
+package org.rl337.skynet.activation;
 
 import org.rl337.skynet.ActivationFunction;
 import org.rl337.math.types.Matrix;
