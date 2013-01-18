@@ -7,7 +7,7 @@ import junit.framework.TestCase;
 
 public class MatrixTest extends TestCase {
 
-    public void assertMatrix(Matrix m, double[][] values) {
+    public void assertMatrix(Matrix m, double[][] values, double delta) {
         int rows = values.length;
         int cols = values[0].length;
         
@@ -17,9 +17,13 @@ public class MatrixTest extends TestCase {
         for(int row = 0; row < rows; row++) {
             for(int col = 0; col < cols; col++) {
                 double val = values[row][col];
-                assertEquals("row " + row + "," + col + " should be " + val, val, m.getValue(row, col));
+                assertEquals("row " + row + "," + col + " should be " + val, val, m.getValue(row, col), delta);
             }
         }
+    }
+    
+    public void assertMatrix(Matrix m, double[][] values) {
+        assertMatrix(m, values, 0.000000000000001);
     }
     
     
@@ -423,6 +427,32 @@ public class MatrixTest extends TestCase {
         };
         
         assertMatrix(m2, bvals);
+    }
+    
+    public void testInverse() {
+        Matrix m = Matrix.matrix(new double[][] { 
+                { 2, -1,  0},
+                {-1,  2, -1},
+                { 0, -1,  2}
+        });
+
+        assertMatrix(m.inverse(), new double[][] { 
+                { 0.75, 0.50,  0.25},
+                { 0.50, 1.00,  0.50},
+                { 0.25, 0.50,  0.75}
+        });
+        
+        Matrix n = Matrix.matrix(new double[][] { 
+                { 1, 2, 3},
+                { 0, 1, 4},
+                { 5, 6, 0}
+        });
+
+        assertMatrix(n.inverse(), new double[][] { 
+                {-24,  18,  5},
+                { 20, -15, -4},
+                { -5,   4,  1}
+        });
     }
     
 }

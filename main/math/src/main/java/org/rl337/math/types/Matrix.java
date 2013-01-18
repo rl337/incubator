@@ -470,6 +470,47 @@ public class Matrix {
         return m;
     }
     
+    public Matrix inverse() {
+        if (mRows != mColumns) {
+            throw new IllegalArgumentException("To solve a matrix, it must be NxN");
+        }
+        
+        Matrix identity = Matrix.identity(mRows);
+        Matrix aug = this.appendColumns(identity);
+        
+        // Eliminate the values below the diagonal
+        for(int i = 0; i < mRows; i++) {
+            // First make sure our diagonal equals 1.
+            double thisRowTerm = aug.getValue(i, i);
+            for(int y = 0; y < 2 * mColumns; y++) {
+                aug.setValue(i, y, aug.getValue(i, y) / thisRowTerm);
+            }
+            
+            // Now for all rows below, subtract out some multiple of this row.
+            for(int j = i + 1; j < mRows; j++) {
+                double thatRowTerm = aug.getValue(j, i);
+                
+                for(int y = 0; y < 2 * mColumns; y++) {
+                    aug.setValue(j, y, aug.getValue(j, y) - aug.getValue(i, y) * thatRowTerm);
+                }
+            }
+        }
+        
+        // Eliminate the values above the diagonal
+        for(int i = mRows -1; i > 0; i--) {
+
+            for(int j = i - 1; j > -1; j--) {
+                double thatRowTerm = aug.getValue(j, i);
+                
+                for(int y = 0; y < 2 * mColumns; y++) {
+                    aug.setValue(j, y, aug.getValue(j, y) - aug.getValue(i, y) * thatRowTerm);
+                }
+            }
+        }
+        
+        return aug.sliceColumns(mColumns, aug.getColumns() - 1);
+    }
+    
     /**
      * Returns a matrix of zeros.
      * @param rows number of rows
