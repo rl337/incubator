@@ -4,9 +4,11 @@ import org.rl337.skynet.Hypothesis;
 import org.rl337.math.types.Matrix;
 
 public class PerceptronOptimizer extends AbstractBatchOptimizer {
+    private double mAlpha;
 
-    public PerceptronOptimizer(int batchSize) {
+    public PerceptronOptimizer(int batchSize, double alpha) {
         super(Hypothesis.Perceptron, null, batchSize);
+        mAlpha = alpha;
     }
 
     @Override
@@ -23,9 +25,9 @@ public class PerceptronOptimizer extends AbstractBatchOptimizer {
             
             Matrix m = x.sliceRow(j).transpose();
             if (expected == 0.0) {
-                theta = theta.subtract(m);
+                theta = theta.subtract(m.multiply(mAlpha));
             } else {
-                theta = theta.add(m);
+                theta = theta.add(m.multiply(1.0 - mAlpha));
             }
         }
         

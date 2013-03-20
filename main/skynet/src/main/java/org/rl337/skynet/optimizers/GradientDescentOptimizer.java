@@ -18,7 +18,14 @@ public class GradientDescentOptimizer extends AbstractIterativeOptimizer {
     }
 
     @Override
-    public Matrix runIteration(Matrix theta, Matrix gradient) {
+    public Matrix runIteration(Matrix theta, Matrix x, Matrix y) {
+        
+        Hypothesis h = getHypothesis();
+        GradientCostFunction c = (GradientCostFunction) getCostFunction(); 
+        
+        // Calculates Gradient
+        Matrix gradient = c.gradient(h, theta, x, y);
+        
         return theta.subtract(gradient.multiply(mAlpha));
     }
     

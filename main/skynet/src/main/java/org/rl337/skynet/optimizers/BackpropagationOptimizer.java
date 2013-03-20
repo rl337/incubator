@@ -11,7 +11,8 @@ public class BackpropagationOptimizer extends AbstractIterativeOptimizer {
     }
 
     @Override
-    public Matrix runIteration(Matrix theta, Matrix gradient) {
+    public Matrix runIteration(Matrix theta, Matrix x, Matrix y) {
+        
         return null;
     }
 

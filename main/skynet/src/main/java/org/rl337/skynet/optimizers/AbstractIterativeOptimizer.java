@@ -47,11 +47,8 @@ public abstract class AbstractIterativeOptimizer extends Optimizer {
         Matrix result = initialTheta;
         int debugSize = 0;
         for(int i = 0; i < mIterations; i++) {
-            // Calculates Gradient
-            Matrix gradient = c.gradient(h, result, x, y);
-            
            // Performs iteration
-            result = runIteration(result, gradient);
+            result = runIteration(result, x, y);
             
             // In theory, score should be decreasing over time...
             // check to see if delta score is less than epsilon.
@@ -84,6 +81,6 @@ public abstract class AbstractIterativeOptimizer extends Optimizer {
         return mDebugData;
     }
     
-    public abstract Matrix runIteration(Matrix theta, Matrix gradient);
+    public abstract Matrix runIteration(Matrix theta, Matrix x, Matrix y);
 
 }
