@@ -6,6 +6,7 @@ public interface DataSet {
 
     Matrix getNextBatch(int size);
     Matrix getAll();
+    Matrix getSubsample(double sample_probability);
     boolean hasMore();
 
 

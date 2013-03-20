@@ -1,13 +1,14 @@
 package org.rl337.skynet.datasets;
 
-import org.rl337.skynet.DataSet;
 import org.rl337.math.types.Matrix;
+import org.rl337.skynet.DataSet;
 
-public class FilterDataSet implements DataSet {
+public class FilterDataSet extends AbstractDataSet {
     private DataSet mDataSet;
     private Filter mFilter;
     
     public FilterDataSet(DataSet wrapped, Filter filter) {
+        super(null);
         mDataSet = wrapped;
         mFilter = filter;
     }
@@ -75,8 +76,40 @@ public class FilterDataSet implements DataSet {
         return mDataSet.hasMore();
     }
     
+
+    public Matrix getSubsample(double sample_probability) {
+        if (!hasMore()) {
+            return null;
+        }
+        
+        Matrix result = mDataSet.getNextBatch(1);
+        if (result == null) {
+            return null;
+        }
+        
+        while(hasMore()) {
+            Matrix m = mDataSet.getNextBatch(1);
+            if (m == null) {
+                break;
+            }
+            
+            if (!shouldKeep(sample_probability)) {
+                continue;
+            }
+            
+            if (!mFilter.valid(m)) {
+                continue;
+            }
+            
+            result.appendRows(m);
+        }
+        
+        return result;
+    }
+    
     public static interface Filter {
         boolean valid(Matrix row);
     }
+
 
 }

@@ -3,6 +3,8 @@ package org.rl337.skynet.datasets;
 import java.io.DataInput;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Random;
 
 import org.rl337.math.types.Matrix;
 
@@ -13,6 +15,10 @@ public class MNISTLabelDataSet extends AbstractFileDataSet {
 
     public MNISTLabelDataSet(File f) throws IOException {
         super(f);
+        mLastRow = 0;
+    }
+    public MNISTLabelDataSet(File f, Random rand) throws IOException {
+        super(f, rand);
         mLastRow = 0;
     }
     
@@ -33,7 +39,7 @@ public class MNISTLabelDataSet extends AbstractFileDataSet {
 
     @Override
     protected Matrix readNextBatch(DataInput is, int size) throws IOException {
-        double[][] values = readRows(is, size);
+        double[][] values = readRows(is, size, 1.0);
         if (rest() < 1) {
             close();
         }
@@ -42,23 +48,40 @@ public class MNISTLabelDataSet extends AbstractFileDataSet {
 
     @Override
     protected Matrix readAll(DataInput is) throws IOException {
-        double[][] values = readRows(is, -1);
+        double[][] values = readRows(is, -1, 1.0);
         close();
         return Matrix.matrix(values);
     }
     
-    public double[][] readRows(DataInput is, int size) throws IOException {
+    public double[][] readRows(DataInput is, int size, double subsample) throws IOException {
         
         int rest = rest();
         if (size == -1 || size > rest) {
             size = rest;
         }
         
-        double[][] data = new double[size][1];
+        ArrayList<Double> data = new ArrayList<Double>();
         for (int row = 0; row < size; row++) {
-            data[row][0] = is.readByte();
+            double b = is.readByte(); 
+            if (shouldKeep(subsample)) {
+                data.add(b);
+            }
         }
-        return data;
+        
+        double[][] result = new double[data.size()][1];
+        for(int i = 0; i < data.size(); i++) {
+            result[i][0] = data.get(i);
+        }
+        
+        return result;
+    }
+
+
+    @Override
+    protected Matrix readAllSubsampled(DataInput is, double prob) throws IOException {
+        double[][] values = readRows(is, -1, prob);
+        close();
+        return Matrix.matrix(values);
     }
 
 }

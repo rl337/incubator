@@ -1,13 +1,13 @@
 package org.rl337.skynet.datasets;
 
-import org.rl337.skynet.DataSet;
 import org.rl337.math.types.Matrix;
 
-public class MatrixDataSet implements DataSet {
+public class MatrixDataSet extends AbstractDataSet {
         private Matrix mMatrix;
         private int mLastRow;
         
         public MatrixDataSet(Matrix m) {
+            super(null);
             mMatrix = m;
             mLastRow = 0;
         }
@@ -42,5 +42,17 @@ public class MatrixDataSet implements DataSet {
             }
             
             return getNextBatch(rest());
+        }
+
+        @Override
+        public Matrix getSubsample(double sample_probability) {
+            Matrix newMatrix = mMatrix.sliceRow(0);
+            for(int i = 1; i < mMatrix.getRows(); i++) {
+                if (shouldKeep(sample_probability)) {
+                    newMatrix.add(mMatrix.sliceRow(i));
+                }
+            }
+            
+            return newMatrix;
         }
 }
