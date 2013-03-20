@@ -21,12 +21,16 @@ import org.rl337.math.types.Matrix;
 
 public class Sketchpad {
     private JFrame mFrame;
+    private int mX;
+    private int mY;
     
     private DrawPanel mPanel;
     
     public Sketchpad(String title, String firstPageName, int width, int height) {
         DrawPanel panel = new DrawPanel(firstPageName, width, height);
         init(title, panel, width, height);
+        mX = 0;
+        mY = 0;
     }
     
     public Sketchpad(String title, String firstPageName, int width, int height, double minX, double maxX, double minY, double maxY) {
@@ -92,8 +96,13 @@ public class Sketchpad {
     }
     
     public void plotAsBitmaps(String name, int bmWidth, int bmHeight, int columns, int rows, Matrix m) {
-        mPanel.plotAsBitmaps(name, bmWidth, bmHeight, columns, rows, m);
+        mPanel.plotAsBitmaps(name, mX, mY, bmWidth, bmHeight, columns, rows, m);
         refresh();
+    }
+    
+    public void setCursor(int x, int y) {
+        mX = x;
+        mY = y;
     }
     
     public void refresh() {
@@ -130,10 +139,10 @@ public class Sketchpad {
             invalidate();
         }
         
-        public void plotAsBitmaps(String name, int bmWidth, int bmHeight, int columns, int rows, Matrix m) {
+        public void plotAsBitmaps(String name, int x, int y, int bmWidth, int bmHeight, int columns, int rows, Matrix m) {
             setActiveImage(name);
             SketchpadImage image = mImageMap.get(name);
-            image.plotBitmaps(bmWidth, bmHeight, columns, rows, m);
+            image.plotBitmaps(x, y, bmWidth, bmHeight, columns, rows, m);
             invalidate();
         }
         
@@ -265,6 +274,11 @@ public class Sketchpad {
             for(int j = 0; j < x.getColumns(); j++) {
                 for(int i = 0; i < x.getRows(); i++) {
                     double v = x.getValue(i, j);
+                    
+                    if (Double.isInfinite(v) || Double.isNaN(v)) {
+                        continue;
+                    }
+                    
                     if (mMinX > v) {
                         mMinX = v;
                     }
@@ -342,7 +356,7 @@ public class Sketchpad {
             mImage.flush();
         }
         
-        public void plotBitmaps(int bmWidth, int bmHeight, int columns, int rows, Matrix matrix) {
+        public void plotBitmaps(int xo, int yo, int bmWidth, int bmHeight, int columns, int rows, Matrix matrix) {
             int matrixColumns = bmWidth * bmHeight;
             if (matrix.getColumns() != matrixColumns) {
                 throw new IllegalArgumentException("bitmap width x height should equal matrix columns");
@@ -373,7 +387,7 @@ public class Sketchpad {
                         
                         int colorIndex = (int) (val * 255);
                         g.setColor(sm256Monochrome[colorIndex]);
-                        g.drawRect(xoffset + x, yoffset + y, 1, 1);
+                        g.drawRect(xoffset + x + xo, yoffset + y + yo, 1, 1);
                     }
                 }
             }
