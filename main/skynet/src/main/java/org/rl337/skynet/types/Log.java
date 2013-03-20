@@ -20,6 +20,17 @@ public class Log {
             }
         }
         
+        private static class LogPlusOneFunction implements Matrix.MatrixOperation {
+            public double operation(int row, int col, double x) {
+                double y = Math.log(x + 1);
+                if (Double.isNaN(y) || Double.isInfinite(y)) {
+                    System.err.println("row: " + row + " produced a NaN (" + x + ")");
+                }
+                return y;
+            }
+        }
+        
         public static final Log RealLog = new Log(new LogFunction());
+        public static final Log RealLogPlusOne = new Log(new LogPlusOneFunction());
 
 }
