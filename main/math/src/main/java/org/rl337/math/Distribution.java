@@ -27,5 +27,19 @@ public interface Distribution {
      * @return the value in the sample set that represents pr(x) = prob
      */
     double q(double prob);
+    
+    /**
+     * Returns the expected value of this distribution.  Expected value
+     * is generally just the mean of the distribution.
+     * @return the expected value of this distribution
+     */
+    double expected();
+    
+    /**
+     * Returns the variance of the distribution.  Essentially,
+     * this is the standard deviation squared.
+     * @return the variance of the distribution
+     */
+    double variance();
 
 }

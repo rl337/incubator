@@ -453,6 +453,18 @@ public class MatrixTest extends TestCase {
                 { 20, -15, -4},
                 { -5,   4,  1}
         });
+        
+//        Matrix o = Matrix.matrix(new double[][] { 
+//                { 0, 1, 4},
+//                { 1, 2, 3},
+//                { 5, 6, 0}
+//        });
+//
+//        assertMatrix(o.inverse(), new double[][] { 
+//            { 18, -24,   5},
+//            {-15,  20,  -4},
+//            {  4,  -5,   1}
+//        });
     }
     
 }

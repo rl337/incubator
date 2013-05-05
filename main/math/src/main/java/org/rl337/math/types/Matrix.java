@@ -470,19 +470,14 @@ public class Matrix {
         return m;
     }
     
-    public Matrix inverse() {
-        if (mRows != mColumns) {
-            throw new IllegalArgumentException("To solve a matrix, it must be NxN");
-        }
-        
-        Matrix identity = Matrix.identity(mRows);
-        Matrix aug = this.appendColumns(identity);
+    public Matrix solve() {
+        Matrix aug = Matrix.matrix(this);
         
         // Eliminate the values below the diagonal
         for(int i = 0; i < mRows; i++) {
             // First make sure our diagonal equals 1.
             double thisRowTerm = aug.getValue(i, i);
-            for(int y = 0; y < 2 * mColumns; y++) {
+            for(int y = 0; y < mColumns; y++) {
                 aug.setValue(i, y, aug.getValue(i, y) / thisRowTerm);
             }
             
@@ -490,7 +485,7 @@ public class Matrix {
             for(int j = i + 1; j < mRows; j++) {
                 double thatRowTerm = aug.getValue(j, i);
                 
-                for(int y = 0; y < 2 * mColumns; y++) {
+                for(int y = 0; y < mColumns; y++) {
                     aug.setValue(j, y, aug.getValue(j, y) - aug.getValue(i, y) * thatRowTerm);
                 }
             }
@@ -502,13 +497,25 @@ public class Matrix {
             for(int j = i - 1; j > -1; j--) {
                 double thatRowTerm = aug.getValue(j, i);
                 
-                for(int y = 0; y < 2 * mColumns; y++) {
+                for(int y = 0; y < mColumns; y++) {
                     aug.setValue(j, y, aug.getValue(j, y) - aug.getValue(i, y) * thatRowTerm);
                 }
             }
         }
         
-        return aug.sliceColumns(mColumns, aug.getColumns() - 1);
+        return aug;
+    }
+    
+    public Matrix inverse() {
+        if (mRows != mColumns) {
+            throw new IllegalArgumentException("To solve a matrix, it must be NxN");
+        }
+        
+        Matrix identity = Matrix.identity(mRows);
+        Matrix aug = this.appendColumns(identity);
+        Matrix solution = aug.solve();
+        
+        return solution.sliceColumns(mColumns, aug.getColumns() - 1);
     }
     
     /**
