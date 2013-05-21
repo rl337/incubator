@@ -200,7 +200,7 @@ sub calcExponent {
 
 
 my %constants = (
-   'pi' => { name=>'pi', value=>3.14159265258979323 },
+   'pi' => { name=>'pi', value=>3.14159265358979323 },
    'g' =>  { name=>'Acc due to Gravity', value=>9.80665 },
    'e' =>  { name=>'ln(1)', value=>2.71828 },
    'N' =>  { name=>'Avogadro number', value=>6.0221367E23 },
