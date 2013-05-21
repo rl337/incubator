@@ -276,12 +276,32 @@ public class Matrix {
         );
     }
     
+    public Matrix subtract(final double v) {
+        return matrixOperation(this,
+            new MatrixOperation() {
+                public double operation(int row, int col, double val) {
+                    return val - v;
+                }
+            }
+        );
+    }
+    
 
     public Matrix pow(final double i) {
         return matrixOperation(this,
             new MatrixOperation() {
                 public double operation(int row, int col, double val) {
                     return Math.pow(val, i);
+                }
+            }
+        );
+    }
+    
+    public Matrix exp() {
+        return matrixOperation(this,
+            new MatrixOperation() {
+                public double operation(int row, int col, double val) {
+                    return Math.exp(val);
                 }
             }
         );

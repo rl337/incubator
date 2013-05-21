@@ -75,4 +75,15 @@ public class TestData {
         
         return features;
     }
+    
+    public static Matrix generateExponentialFeatures(Matrix x, int degree) {
+
+        Matrix features = Matrix.ones(x.getRows(), 1);
+        for(int i = 1; i < degree; i++) {
+            Matrix x1degree = x.pow(i).exp();
+            features = features.appendColumns(x1degree);
+        }
+        
+        return features;
+    }
 }

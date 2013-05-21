@@ -20,7 +20,7 @@ public class LogisticRegressionSandbox {
         GradientCostFunction c = new LogisticRegressionCostFunction(0.1);
         GradientDescentOptimizer optimizer = new GradientDescentOptimizer(0.01, Hypothesis.LogisticRegression, c, 10000, 1.0E-30, true);
 
-        DataSet training = new MNISTPixelDataSet(new File("data/train-images-idx3-ubyte.gz"));
+        DataSet training = new MNISTPixelDataSet(new File("data/train-images-idx3-ubyte.gz"), true);
         DataSet labels = new MNISTLabelDataSet(new File("data/train-labels-idx1-ubyte.gz"));
 
         optimalTheta = optimizer.run(
